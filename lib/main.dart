@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'search_tab.dart';
+import 'gallery_tab.dart';
+import 'review_tab.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,12 +32,24 @@ class _MainScreenState extends State<MainScreen> {
   // 두 번째 탭(인덱스 1)을 기본 선택
   int _currentIndex = 1;
 
+  late final List<Widget> _tabContents;
+  @override
+  void initState(){
+    super.initState();
+    _tabContents = [
+      const SearchTab(),
+      const GalleryTab(),
+      const ReviewTab(),
+    ];
+  }
+  /*
   // 탭마다 다른 텍스트를 보여줄 예시
   final List<Widget> _tabContents = [
     const Center(child: Text('도서 검색 탭', style: TextStyle(fontSize: 20))),
     const Center(child: Text('갤러리 탭', style: TextStyle(fontSize: 20))),
     const Center(child: Text('리뷰 작성 탭', style: TextStyle(fontSize: 20))),
   ];
+  */
 
   @override
   Widget build(BuildContext context) {
