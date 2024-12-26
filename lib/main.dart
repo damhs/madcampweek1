@@ -13,14 +13,32 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Hello World'),
+          title: Text('독서 리뷰 앱'),
         ),
         body: Center(
           child: Text('Hello World'),
         ),
-        // bottomNavigationBar: BottomNavigationBar(
-
-        // ),
+        
+         bottomNavigationBar: BottomNavigationBar(
+          /*currentIndex: _currentIndex,
+          onTab:(int index){
+            setState(()=>_currentIndex = index);
+          },*/
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: '검색',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.photo_library),
+              label: '갤러리',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.edit),
+              label: '리뷰',
+            ),
+          ],
+       ),
       ),
     );
   }

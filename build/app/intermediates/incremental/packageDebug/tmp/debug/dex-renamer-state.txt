@@ -1,8 +1,8 @@
-#Thu Dec 26 18:05:13 KST 2024
-base.0=/Users/ihansaem/project/madcamp/madcampweek1/build/app/intermediates/dex/debug/mergeExtDexDebug/classes.dex
-base.1=/Users/ihansaem/project/madcamp/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
-base.2=/Users/ihansaem/project/madcamp/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/1/classes.dex
-base.3=/Users/ihansaem/project/madcamp/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/12/classes.dex
+#Thu Dec 26 19:41:23 KST 2024
+base.0=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeExtDexDebug/classes.dex
+base.1=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
+base.2=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/1/classes.dex
+base.3=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/12/classes.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.2=1/classes.dex
