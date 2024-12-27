@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+late SharedPreferences prefs;
 
 class ReviewTab extends StatefulWidget {
   const ReviewTab({Key? key}) : super(key: key);
@@ -7,30 +11,43 @@ class ReviewTab extends StatefulWidget {
   State<ReviewTab> createState() => _ReviewTabState();
 }
 
-class _ReviewTabState extends State<ReviewTab> {
-  // 로컬 리뷰 데이터
-  final List<Map<String, String>> _reviews = [
-    {
-      'title': '1984',
-      'author': 'George Orwell',
-      'genre': 'Dystopian',
-      'date': '2024-11-27',
-      'content': '정말 재미있어요!',
-    },
-    {
-      'title': '채식주의자',
-      'author': '한 강',
-      'genre': '장편소설',
-      'date': '2024-12-24',
-      'content': '흥미로운 내용이에요!',
-    },
-  ];
+class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixin {
+  List<Map<String, String>> _reviews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews(); // 앱 실행 시 저장된 리뷰 로드
+  }
+
+  // 리뷰 데이터 로드
+  Future<void> _loadReviews() async {
+  prefs = await SharedPreferences.getInstance();
+  final String? reviewsString = prefs.getString('reviews');
+  if (reviewsString != null) {
+    final List<dynamic> jsonData = jsonDecode(reviewsString);
+    setState(() {
+      _reviews = jsonData
+          .map((review) => Map<String, String>.from(review as Map))
+          .toList();
+      //debugPrint("Loaded reviews: $_reviews"); // 로드된 데이터 확인
+    });
+  }
+}
+
+  // 리뷰 데이터 저장
+  Future<void> _saveReviews() async {
+    final String reviewsString = jsonEncode(_reviews);
+    await prefs.setString('reviews', reviewsString);
+    //debugPrint("Saved reviews: $reviewsString"); // 저장된 데이터 확인
+  }
 
   // 리뷰 추가 함수
   void _addReview(Map<String, String> newReview) {
     setState(() {
       _reviews.add(newReview);
     });
+    _saveReviews(); // 새로운 리뷰 저장
   }
 
   // 다이얼로그 띄우기
@@ -101,6 +118,7 @@ class _ReviewTabState extends State<ReviewTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin을 위해 호출
     return Scaffold(
       body: ListView.builder(
         itemCount: _reviews.length,
@@ -130,4 +148,7 @@ class _ReviewTabState extends State<ReviewTab> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true; // 상태 유지 활성화
 }
