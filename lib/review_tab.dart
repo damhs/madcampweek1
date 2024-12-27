@@ -22,6 +22,7 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     _loadReviews();
   }
 
+  // SharedPreferences에서 리뷰 데이터 로드
   Future<void> _loadReviews() async {
     prefs = await SharedPreferences.getInstance();
     final reviewsString = prefs.getString('reviews');
@@ -34,38 +35,51 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     }
   }
 
+  // SharedPreferences에 리뷰 데이터 저장
   Future<void> _saveReviews() async {
     await prefs.setString('reviews', jsonEncode(_reviews));
   }
 
+  // 리뷰 추가
   void _addReview(Map<String, String> newReview) {
     setState(() => _reviews.add(newReview));
     _saveReviews();
   }
 
+  // 리뷰 수정
   void _editReview(int index, Map<String, String> updatedReview) {
     setState(() => _reviews[index] = updatedReview);
     _saveReviews();
   }
 
+  // 리뷰 삭제
   void _deleteReview(int index) {
     setState(() => _reviews.removeAt(index));
     _saveReviews();
   }
 
+  // 선택된 리뷰 삭제
   void _deleteSelectedReviews() {
-  setState(() {
-    _reviews = _reviews.asMap().entries
-        .where((entry) => !selectedIndexes.contains(entry.key))
-        .map((entry) => entry.value)
-        .toList();
-    selectedIndexes.clear();
-    isSelectionMode = false;
-  });
-  _saveReviews();
-}
+    setState(() {
+      _reviews = _reviews.asMap().entries
+          .where((entry) => !selectedIndexes.contains(entry.key))
+          .map((entry) => entry.value)
+          .toList();
+      selectedIndexes.clear();
+      isSelectionMode = false;
+    });
+    _saveReviews();
+  }
 
+  // 선택 모드 토글
+  void _toggleSelectionMode() {
+    setState(() {
+      isSelectionMode = !isSelectionMode;
+      selectedIndexes.clear();
+    });
+  }
 
+  // 리뷰 추가 및 수정 다이얼로그 표시
   void _showReviewDialog({
     required String title,
     Map<String, String>? currentReview,
@@ -85,9 +99,12 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
             child: Column(
               children: [
                 _buildTextField(controller: titleController, label: '책 제목'),
+                const SizedBox(height: 12),
                 _buildTextField(controller: authorController, label: '작가'),
+                const SizedBox(height: 12),
                 _buildTextField(controller: genreController, label: '장르'),
-                _buildTextField(controller: contentController, label: '리뷰 내용'),
+                const SizedBox(height: 12),
+                _buildTextField(controller: contentController, label: '리뷰 내용', maxLines: 5),
               ],
             ),
           ),
@@ -120,6 +137,7 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     );
   }
 
+  // 공통 텍스트 필드 생성
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -135,16 +153,15 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     );
   }
 
+  // 리뷰 카드 생성
   Widget _buildReviewCard(Map<String, String> review, int index) {
     return GestureDetector(
       onTap: () {
         if (isSelectionMode) {
           setState(() {
-            if (selectedIndexes.contains(index)) {
-              selectedIndexes.remove(index);
-            } else {
-              selectedIndexes.add(index);
-            }
+            selectedIndexes.contains(index)
+                ? selectedIndexes.remove(index)
+                : selectedIndexes.add(index);
           });
         } else {
           Navigator.push(
@@ -168,33 +185,50 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
         elevation: 2,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                review['title'] ?? '제목 없음',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    review['author'] ?? '작가 정보 없음',
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  Text(
-                    review['genre'] ?? '장르 정보 없음',
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  review['date'] ?? '날짜 정보 없음',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+              if (isSelectionMode)
+                Checkbox(
+                  value: selectedIndexes.contains(index),
+                  onChanged: (value) {
+                    setState(() {
+                      value!
+                          ? selectedIndexes.add(index)
+                          : selectedIndexes.remove(index);
+                    });
+                  },
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      review['title'] ?? '제목 없음',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          review['author'] ?? '작가 정보 없음',
+                          style: const TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                        Text(
+                          review['genre'] ?? '장르 정보 없음',
+                          style: const TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        review['date'] ?? '날짜 정보 없음',
+                        style: const TextStyle(fontSize: 12, color: Colors.black),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -209,15 +243,24 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(isSelectionMode ? '리뷰 선택' : '리뷰 목록'),
+        title: Text(isSelectionMode ? '리뷰 선택' : '나의 리뷰'),
         actions: isSelectionMode
             ? [
-                IconButton(
-                  icon: const Icon(Icons.delete),
+                TextButton(
+                  onPressed: _toggleSelectionMode,
+                  child: const Text('취소', style: TextStyle(color: Colors.black)),
+                ),
+                TextButton(
                   onPressed: _deleteSelectedReviews,
+                  child: const Text('삭제', style: TextStyle(color: Colors.black)),
                 ),
               ]
-            : null,
+            : [
+                IconButton(
+                  icon: const Icon(Icons.checklist),
+                  onPressed: _toggleSelectionMode,
+                ),
+              ],
       ),
       body: _reviews.isEmpty
           ? const Center(child: Text('저장된 리뷰가 없습니다.'))
@@ -277,8 +320,11 @@ class ReviewDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(controller: titleController, label: '책 제목'),
+              const SizedBox(height: 12),
               _buildTextField(controller: authorController, label: '작가'),
+              const SizedBox(height: 12),
               _buildTextField(controller: genreController, label: '장르'),
+              const SizedBox(height: 12),
               _buildTextField(controller: contentController, label: '리뷰 내용', maxLines: 5),
               const SizedBox(height: 16),
               ElevatedButton(
