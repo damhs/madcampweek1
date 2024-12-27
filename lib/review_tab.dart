@@ -9,7 +9,7 @@ class ReviewTab extends StatefulWidget {
 
 class _ReviewTabState extends State<ReviewTab> {
   // 로컬 리뷰 데이터
-  final List<Map<String, String>> reviews = const[
+  final List<Map<String, String>> _reviews = [
     {
       'title': '1984',
       'author': 'George Orwell',
@@ -29,7 +29,7 @@ class _ReviewTabState extends State<ReviewTab> {
   // 리뷰 추가 함수
   void _addReview(Map<String, String> newReview) {
     setState(() {
-      reviews.add(newReview);
+      _reviews.add(newReview);
     });
   }
 
@@ -103,9 +103,9 @@ class _ReviewTabState extends State<ReviewTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemCount: reviews.length,
+        itemCount: _reviews.length,
         itemBuilder: (context, index) {
-          final review = reviews[index];
+          final review = _reviews[index];
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
             child: Column(
@@ -117,7 +117,7 @@ class _ReviewTabState extends State<ReviewTab> {
                 Text('장르: ${review['genre'] ?? 'No Genre'}'),
                 Text('리뷰 날짜: ${review['date'] ?? 'No Date'}'),
                 Text('리뷰 내용: ${review['content'] ?? 'No Content'}'),
-                const Divider(),
+                const Divider(), // 항목 간 구분선
               ],
             ),
           );
