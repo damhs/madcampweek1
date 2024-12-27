@@ -190,6 +190,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
               if (isSelectionMode)
                 Checkbox(
                   value: selectedIndexes.contains(index),
+                  activeColor: Color(0xFF33CCCC),
+                  checkColor: Colors.white,
                   onChanged: (value) {
                     setState(() {
                       value!
@@ -275,7 +277,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
             onSubmit: _addReview,
           );
         },
-        child: const Icon(Icons.add),
+        backgroundColor: Color(0xFF33CCCC),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

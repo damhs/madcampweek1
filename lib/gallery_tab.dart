@@ -90,7 +90,8 @@ class _GalleryTabState extends State<GalleryTab> {
           )),
       floatingActionButton: FloatingActionButton(
         onPressed: _pickImage,
-        child: const Icon(Icons.add),
+        backgroundColor: Color(0xFF33CCCC),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
