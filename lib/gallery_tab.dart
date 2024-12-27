@@ -8,17 +8,20 @@ class GalleryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final sizeX = MediaQuery.of(context).size.width;
     final sizeY = MediaQuery.of(context).size.height;
-    return Container(
-      width: sizeX,
-      height: sizeY,
-      child: GridView.count(
-        scrollDirection: Axis.vertical,
-        crossAxisCount: 2,
-        children: createGallery(6),
-        mainAxisSpacing: 5.0,
-        crossAxisSpacing: 5.0,
-        padding: EdgeInsets.all(5.0),
+    return Scaffold(
+      body: Container(
+        width: sizeX,
+        height: sizeY,
+        child: GridView.count(
+          scrollDirection: Axis.vertical,
+          crossAxisCount: 2,
+          children: createGallery(6),
+          mainAxisSpacing: 5.0,
+          crossAxisSpacing: 5.0,
+          padding: EdgeInsets.all(5.0),
+        ),
       ),
+      floatingActionButton: const GalleryFloatingButton(),
     );
   }
 

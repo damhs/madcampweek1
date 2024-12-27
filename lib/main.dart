@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
 
   late final List<Widget> _tabContents;
-  late final List<Widget> _floatingButtons;
+
   @override
   void initState() {
     super.initState();
@@ -42,11 +42,6 @@ class _MainScreenState extends State<MainScreen> {
       const SearchTab(),
       const GalleryTab(),
       const ReviewTab(),
-    ];
-    _floatingButtons = [
-      const SizedBox.shrink(),
-      const GalleryFloatingButton(),
-      const SizedBox.shrink(),
     ];
   }
   /*
@@ -66,7 +61,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
       // 현재 탭에 해당하는 위젯만 표시
       body: _tabContents[_currentIndex],
-      floatingActionButton: _floatingButtons[_currentIndex],
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
