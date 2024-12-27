@@ -34,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
 
   late final List<Widget> _tabContents;
+  late final List<Widget> _floatingButtons;
   @override
   void initState() {
     super.initState();
@@ -41,6 +42,11 @@ class _MainScreenState extends State<MainScreen> {
       const SearchTab(),
       const GalleryTab(),
       const ReviewTab(),
+    ];
+    _floatingButtons = [
+      const SizedBox.shrink(),
+      const GalleryFloatingButton(),
+      const SizedBox.shrink(),
     ];
   }
   /*
@@ -60,14 +66,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       // 현재 탭에 해당하는 위젯만 표시
       body: _tabContents[_currentIndex],
-      floatingActionButton: _currentIndex == 1
-          ? FloatingActionButton(
-              onPressed: () {
-                print('갤러리 탭의 플로팅 버튼 클릭');
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: _floatingButtons[_currentIndex],
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

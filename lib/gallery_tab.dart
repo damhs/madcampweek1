@@ -1,3 +1,4 @@
+// gallery_tab.dart
 import 'package:flutter/material.dart';
 
 class GalleryTab extends StatelessWidget {
@@ -44,5 +45,23 @@ class GalleryTab extends StatelessWidget {
       images.add(image);
     }
     return images;
+  }
+}
+
+class GalleryFloatingButton extends StatelessWidget {
+  const GalleryFloatingButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('갤러리 탭의 플로팅 버튼을 눌렀습니다.'),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+    );
   }
 }
