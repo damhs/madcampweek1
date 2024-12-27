@@ -1,10 +1,18 @@
-// gallery_tab.dart
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class GalleryTab extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
+
+class GalleryTab extends StatefulWidget {
   GalleryTab({Key? key}) : super(key: key);
 
-  // 이미지와 설명 리스트
+  @override
+  _GalleryTabState createState() => _GalleryTabState();
+}
+
+class _GalleryTabState extends State<GalleryTab> {
+  // 초기 이미지와 설명 리스트
   final List<Map<String, String>> items = [
     {'image': 'img/img1.jpeg', 'description': '설명 1'},
     {'image': 'img/img2.jpeg', 'description': '설명 2'},
@@ -13,6 +21,30 @@ class GalleryTab extends StatelessWidget {
     {'image': 'img/img5.jpeg', 'description': '설명 5'},
     {'image': 'img/img6.jpeg', 'description': '설명 6'},
   ];
+
+  final ImagePicker _picker = ImagePicker();
+
+  // 갤러리에서 이미지를 선택
+  Future<void> _pickImage() async {
+    // 권한 요청
+    final status = await Permission.photos.request();
+    if (status.isGranted) {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          items.add({
+            'image': pickedFile.path,
+            'description': '추가된 설명 ${items.length + 1}',
+          });
+        });
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +55,13 @@ class GalleryTab extends StatelessWidget {
           width: sizeX,
           height: sizeY,
           child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
               childAspectRatio: 0.75,
             ),
-            itemCount: 6,
+            itemCount: items.length,
             padding: const EdgeInsets.all(5.0),
             itemBuilder: (context, index) {
               return Column(
@@ -38,7 +70,10 @@ class GalleryTab extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(items[index]['image']!),
+                          image: index < 6
+                              ? AssetImage(items[index]['image']!)
+                                  as ImageProvider
+                              : FileImage(File(items[index]['image']!)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -53,25 +88,10 @@ class GalleryTab extends StatelessWidget {
               );
             },
           )),
-      floatingActionButton: const GalleryFloatingButton(),
-    );
-  }
-}
-
-class GalleryFloatingButton extends StatelessWidget {
-  const GalleryFloatingButton({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('갤러리 탭의 플로팅 버튼을 눌렀습니다.'),
-          ),
-        );
-      },
-      child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pickImage,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
