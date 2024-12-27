@@ -22,24 +22,36 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
 
   // 리뷰 데이터 로드
   Future<void> _loadReviews() async {
-  prefs = await SharedPreferences.getInstance();
-  final String? reviewsString = prefs.getString('reviews');
-  if (reviewsString != null) {
-    final List<dynamic> jsonData = jsonDecode(reviewsString);
-    setState(() {
-      _reviews = jsonData
-          .map((review) => Map<String, String>.from(review as Map))
-          .toList();
-      //debugPrint("Loaded reviews: $_reviews"); // 로드된 데이터 확인
-    });
+    prefs = await SharedPreferences.getInstance();
+    final String? reviewsString = prefs.getString('reviews');
+    if (reviewsString != null) {
+      setState(() {
+        _reviews = (jsonDecode(reviewsString) as List)
+            .map((review) => Map<String, String>.from(review))
+            .toList();
+      });
+    }
   }
-}
 
   // 리뷰 데이터 저장
   Future<void> _saveReviews() async {
-    final String reviewsString = jsonEncode(_reviews);
-    await prefs.setString('reviews', reviewsString);
-    //debugPrint("Saved reviews: $reviewsString"); // 저장된 데이터 확인
+    await prefs.setString('reviews', jsonEncode(_reviews));
+  }
+
+  // 리뷰 삭제 함수
+  void _deleteReview(int index) {
+    setState(() {
+      _reviews.removeAt(index);
+    });
+    _saveReviews();
+  }
+
+  // 리뷰 수정 함수
+  void _editReview(int index, Map<String, String> updatedReview) {
+    setState(() {
+      _reviews[index] = updatedReview;
+    });
+    _saveReviews();
   }
 
   // 리뷰 추가 함수
@@ -47,10 +59,10 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     setState(() {
       _reviews.add(newReview);
     });
-    _saveReviews(); // 새로운 리뷰 저장
+    _saveReviews();
   }
 
-  // 다이얼로그 띄우기
+  // 리뷰 추가 다이얼로그 띄우기
   void _showAddReviewDialog() {
     final TextEditingController titleController = TextEditingController();
     final TextEditingController authorController = TextEditingController();
@@ -116,6 +128,73 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     );
   }
 
+  // 리뷰 수정 다이얼로그 띄우기
+  void _showEditReviewDialog(int index) {
+    final currentReview = _reviews[index];
+    final TextEditingController titleController = TextEditingController(text: currentReview['title']);
+    final TextEditingController authorController = TextEditingController(text: currentReview['author']);
+    final TextEditingController genreController = TextEditingController(text: currentReview['genre']);
+    final TextEditingController contentController = TextEditingController(text: currentReview['content']);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('리뷰 수정'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: '책 제목'),
+                ),
+                TextField(
+                  controller: authorController,
+                  decoration: const InputDecoration(labelText: '작가'),
+                ),
+                TextField(
+                  controller: genreController,
+                  decoration: const InputDecoration(labelText: '장르'),
+                ),
+                TextField(
+                  controller: contentController,
+                  decoration: const InputDecoration(labelText: '리뷰 내용'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty &&
+                    authorController.text.isNotEmpty &&
+                    genreController.text.isNotEmpty &&
+                    contentController.text.isNotEmpty) {
+                  _editReview(index, {
+                    'title': titleController.text,
+                    'author': authorController.text,
+                    'genre': genreController.text,
+                    'date': currentReview['date']!,
+                    'content': contentController.text,
+                  });
+                  Navigator.of(context).pop(); // 다이얼로그 닫기
+                }
+              },
+              child: const Text('저장'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // AutomaticKeepAliveClientMixin을 위해 호출
@@ -129,8 +208,34 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('제목: ${review['title'] ?? 'No Title'}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '제목: ${review['title'] ?? 'No Title'}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _showEditReviewDialog(index);
+                        } else if (value == 'delete') {
+                          _deleteReview(index);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('수정'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('삭제'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
                 Text('작가: ${review['author'] ?? 'No Author'}'),
                 Text('장르: ${review['genre'] ?? 'No Genre'}'),
                 Text('리뷰 날짜: ${review['date'] ?? 'No Date'}'),
@@ -142,9 +247,9 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddReviewDialog,
+        onPressed: _showAddReviewDialog, // 리뷰 추가 다이얼로그 호출
         child: const Icon(Icons.add),
-        tooltip: '리뷰 쓰기',
+        tooltip: '리뷰 추가',
       ),
     );
   }
