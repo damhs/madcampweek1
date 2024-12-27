@@ -13,17 +13,18 @@ class ReviewTab extends StatefulWidget {
 
 class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixin {
   List<Map<String, String>> _reviews = [];
+  bool isSelectionMode = false;
+  final Set<int> selectedIndexes = {};
 
   @override
   void initState() {
     super.initState();
-    _loadReviews(); // 앱 실행 시 저장된 리뷰 로드
+    _loadReviews();
   }
 
-  // 리뷰 데이터 로드
   Future<void> _loadReviews() async {
     prefs = await SharedPreferences.getInstance();
-    final String? reviewsString = prefs.getString('reviews');
+    final reviewsString = prefs.getString('reviews');
     if (reviewsString != null) {
       setState(() {
         _reviews = (jsonDecode(reviewsString) as List)
@@ -33,142 +34,66 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     }
   }
 
-  // 리뷰 데이터 저장
   Future<void> _saveReviews() async {
     await prefs.setString('reviews', jsonEncode(_reviews));
   }
 
-  // 리뷰 삭제 함수
-  void _deleteReview(int index) {
-    setState(() {
-      _reviews.removeAt(index);
-    });
-    _saveReviews();
-  }
-
-  // 리뷰 수정 함수
-  void _editReview(int index, Map<String, String> updatedReview) {
-    setState(() {
-      _reviews[index] = updatedReview;
-    });
-    _saveReviews();
-  }
-
-  // 리뷰 추가 함수
   void _addReview(Map<String, String> newReview) {
-    setState(() {
-      _reviews.add(newReview);
-    });
+    setState(() => _reviews.add(newReview));
     _saveReviews();
   }
 
-  // 리뷰 추가 다이얼로그 띄우기
-  void _showAddReviewDialog() {
-    final TextEditingController titleController = TextEditingController();
-    final TextEditingController authorController = TextEditingController();
-    final TextEditingController genreController = TextEditingController();
-    final TextEditingController contentController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('리뷰 추가'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: '책 제목'),
-                ),
-                TextField(
-                  controller: authorController,
-                  decoration: const InputDecoration(labelText: '작가'),
-                ),
-                TextField(
-                  controller: genreController,
-                  decoration: const InputDecoration(labelText: '장르'),
-                ),
-                TextField(
-                  controller: contentController,
-                  decoration: const InputDecoration(labelText: '리뷰 내용'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-              },
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty &&
-                    authorController.text.isNotEmpty &&
-                    genreController.text.isNotEmpty &&
-                    contentController.text.isNotEmpty) {
-                  _addReview({
-                    'title': titleController.text,
-                    'author': authorController.text,
-                    'genre': genreController.text,
-                    'date': DateTime.now().toString().split(' ')[0],
-                    'content': contentController.text,
-                  });
-                  Navigator.of(context).pop(); // 다이얼로그 닫기
-                }
-              },
-              child: const Text('추가'),
-            ),
-          ],
-        );
-      },
-    );
+  void _editReview(int index, Map<String, String> updatedReview) {
+    setState(() => _reviews[index] = updatedReview);
+    _saveReviews();
   }
 
-  // 리뷰 수정 다이얼로그 띄우기
-  void _showEditReviewDialog(int index) {
-    final currentReview = _reviews[index];
-    final TextEditingController titleController = TextEditingController(text: currentReview['title']);
-    final TextEditingController authorController = TextEditingController(text: currentReview['author']);
-    final TextEditingController genreController = TextEditingController(text: currentReview['genre']);
-    final TextEditingController contentController = TextEditingController(text: currentReview['content']);
+  void _deleteReview(int index) {
+    setState(() => _reviews.removeAt(index));
+    _saveReviews();
+  }
+
+  void _deleteSelectedReviews() {
+  setState(() {
+    _reviews = _reviews.asMap().entries
+        .where((entry) => !selectedIndexes.contains(entry.key))
+        .map((entry) => entry.value)
+        .toList();
+    selectedIndexes.clear();
+    isSelectionMode = false;
+  });
+  _saveReviews();
+}
+
+
+  void _showReviewDialog({
+    required String title,
+    Map<String, String>? currentReview,
+    required void Function(Map<String, String>) onSubmit,
+  }) {
+    final titleController = TextEditingController(text: currentReview?['title']);
+    final authorController = TextEditingController(text: currentReview?['author']);
+    final genreController = TextEditingController(text: currentReview?['genre']);
+    final contentController = TextEditingController(text: currentReview?['content']);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('리뷰 수정'),
+          title: Text(title),
           content: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: '책 제목'),
-                ),
-                TextField(
-                  controller: authorController,
-                  decoration: const InputDecoration(labelText: '작가'),
-                ),
-                TextField(
-                  controller: genreController,
-                  decoration: const InputDecoration(labelText: '장르'),
-                ),
-                TextField(
-                  controller: contentController,
-                  decoration: const InputDecoration(labelText: '리뷰 내용'),
-                ),
+                _buildTextField(controller: titleController, label: '책 제목'),
+                _buildTextField(controller: authorController, label: '작가'),
+                _buildTextField(controller: genreController, label: '장르'),
+                _buildTextField(controller: contentController, label: '리뷰 내용'),
               ],
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('취소'),
             ),
             TextButton(
@@ -177,14 +102,14 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
                     authorController.text.isNotEmpty &&
                     genreController.text.isNotEmpty &&
                     contentController.text.isNotEmpty) {
-                  _editReview(index, {
+                  onSubmit({
                     'title': titleController.text,
                     'author': authorController.text,
                     'genre': genreController.text,
-                    'date': currentReview['date']!,
+                    'date': currentReview?['date'] ?? DateTime.now().toString().split(' ')[0],
                     'content': contentController.text,
                   });
-                  Navigator.of(context).pop(); // 다이얼로그 닫기
+                  Navigator.of(context).pop();
                 }
               },
               child: const Text('저장'),
@@ -195,65 +120,199 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context); // AutomaticKeepAliveClientMixin을 위해 호출
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: _reviews.length,
-        itemBuilder: (context, index) {
-          final review = _reviews[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '제목: ${review['title'] ?? 'No Title'}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    PopupMenuButton<String>(
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          _showEditReviewDialog(index);
-                        } else if (value == 'delete') {
-                          _deleteReview(index);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('수정'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text('삭제'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Text('작가: ${review['author'] ?? 'No Author'}'),
-                Text('장르: ${review['genre'] ?? 'No Genre'}'),
-                Text('리뷰 날짜: ${review['date'] ?? 'No Date'}'),
-                Text('리뷰 내용: ${review['content'] ?? 'No Content'}'),
-                const Divider(), // 항목 간 구분선
-              ],
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildReviewCard(Map<String, String> review, int index) {
+    return GestureDetector(
+      onTap: () {
+        if (isSelectionMode) {
+          setState(() {
+            if (selectedIndexes.contains(index)) {
+              selectedIndexes.remove(index);
+            } else {
+              selectedIndexes.add(index);
+            }
+          });
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReviewDetailPage(
+                review: review,
+                onUpdate: (updatedReview) => _editReview(index, updatedReview),
+                onDelete: () {
+                  _deleteReview(index);
+                  Navigator.of(context).pop();
+                },
+              ),
             ),
           );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddReviewDialog, // 리뷰 추가 다이얼로그 호출
-        child: const Icon(Icons.add),
-        tooltip: '리뷰 추가',
+        }
+      },
+      child: Card(
+        color: selectedIndexes.contains(index) ? Colors.blue[50] : Colors.white,
+        margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                review['title'] ?? '제목 없음',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    review['author'] ?? '작가 정보 없음',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  Text(
+                    review['genre'] ?? '장르 정보 없음',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  review['date'] ?? '날짜 정보 없음',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   @override
-  bool get wantKeepAlive => true; // 상태 유지 활성화
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isSelectionMode ? '리뷰 선택' : '리뷰 목록'),
+        actions: isSelectionMode
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _deleteSelectedReviews,
+                ),
+              ]
+            : null,
+      ),
+      body: _reviews.isEmpty
+          ? const Center(child: Text('저장된 리뷰가 없습니다.'))
+          : ListView.builder(
+              itemCount: _reviews.length,
+              itemBuilder: (context, index) => _buildReviewCard(_reviews[index], index),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showReviewDialog(
+            title: '리뷰 추가',
+            onSubmit: _addReview,
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class ReviewDetailPage extends StatelessWidget {
+  final Map<String, String> review;
+  final void Function(Map<String, String>) onUpdate;
+  final VoidCallback onDelete;
+
+  const ReviewDetailPage({
+    Key? key,
+    required this.review,
+    required this.onUpdate,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final titleController = TextEditingController(text: review['title']);
+    final authorController = TextEditingController(text: review['author']);
+    final genreController = TextEditingController(text: review['genre']);
+    final contentController = TextEditingController(text: review['content']);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('리뷰 상세'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: onDelete,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextField(controller: titleController, label: '책 제목'),
+              _buildTextField(controller: authorController, label: '작가'),
+              _buildTextField(controller: genreController, label: '장르'),
+              _buildTextField(controller: contentController, label: '리뷰 내용', maxLines: 5),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  onUpdate({
+                    'title': titleController.text,
+                    'author': authorController.text,
+                    'genre': genreController.text,
+                    'date': review['date']!,
+                    'content': contentController.text,
+                  });
+                  Navigator.of(context).pop();
+                },
+                child: const Text('저장'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
 }
