@@ -2,7 +2,17 @@
 import 'package:flutter/material.dart';
 
 class GalleryTab extends StatelessWidget {
-  const GalleryTab({Key? key}) : super(key: key);
+  GalleryTab({Key? key}) : super(key: key);
+
+  // 이미지와 설명 리스트
+  final List<Map<String, String>> items = [
+    {'image': 'img/img1.jpeg', 'description': '설명 1'},
+    {'image': 'img/img2.jpeg', 'description': '설명 2'},
+    {'image': 'img/img3.jpeg', 'description': '설명 3'},
+    {'image': 'img/img4.jpeg', 'description': '설명 4'},
+    {'image': 'img/img5.jpeg', 'description': '설명 5'},
+    {'image': 'img/img6.jpeg', 'description': '설명 6'},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -10,44 +20,41 @@ class GalleryTab extends StatelessWidget {
     final sizeY = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Container(
-        width: sizeX,
-        height: sizeY,
-        child: GridView.count(
-          scrollDirection: Axis.vertical,
-          crossAxisCount: 2,
-          children: createGallery(6),
-          mainAxisSpacing: 5.0,
-          crossAxisSpacing: 5.0,
-          padding: EdgeInsets.all(5.0),
-        ),
-      ),
+          width: sizeX,
+          height: sizeY,
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 5.0,
+              mainAxisSpacing: 5.0,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: 6,
+            padding: const EdgeInsets.all(5.0),
+            itemBuilder: (context, index) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(items[index]['image']!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    items[index]['description']!,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              );
+            },
+          )),
       floatingActionButton: const GalleryFloatingButton(),
     );
-  }
-
-  List<Widget> createGallery(int num) {
-    List<Widget> images = [];
-    List<String> urls = [];
-    urls.add('img/img1.jpeg');
-    urls.add('img/img2.jpeg');
-    urls.add('img/img3.jpeg');
-    urls.add('img/img4.jpeg');
-    urls.add('img/img5.jpeg');
-    urls.add('img/img6.jpeg');
-
-    Widget image;
-    for (int i = 0; i < num; i++) {
-      image = Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(urls[i]),
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-      images.add(image);
-    }
-    return images;
   }
 }
 

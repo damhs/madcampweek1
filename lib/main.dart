@@ -40,7 +40,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _tabContents = [
       const SearchTab(),
-      const GalleryTab(),
+      GalleryTab(),
       const ReviewTab(),
     ];
   }
