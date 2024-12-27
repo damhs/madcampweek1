@@ -16,6 +16,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Pretendard',
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontSize: 16.0, color: Color.fromARGB(255, 0, 0, 0)),
+          bodyMedium: TextStyle(fontSize: 14.0, color: Color.fromARGB(255, 0, 0, 0)),
+        ),
+      ),
       home: const MainScreen(),
     );
   }
