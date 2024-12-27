@@ -65,6 +65,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - img/dokki_logo.png
     - img/img1.jpeg
     - img/img2.jpeg
     - img/img3.jpeg

@@ -20,8 +20,10 @@ class _SearchTabState extends State<SearchTab> {
       _isLoading = true;
     });
 
-    const apiKey = 'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키 입력
-    final url = Uri.parse('https://www.googleapis.com/books/v1/volumes?q=$query&key=$apiKey');
+    const apiKey =
+        'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키 입력
+    final url = Uri.parse(
+        'https://www.googleapis.com/books/v1/volumes?q=$query&key=$apiKey');
 
     try {
       final response = await http.get(url);
@@ -53,22 +55,34 @@ class _SearchTabState extends State<SearchTab> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         toolbarHeight: 80,
-        title: TextField(
-          controller: _searchController,
-          onSubmitted: _searchBooks,
-          cursorColor: Colors.grey,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Icons.search, color: Colors.grey),
-            hintText: "도서를 검색하세요.",
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
+        title: Row(
+          children: [
+            Image.asset(
+              'img/dokki_logo.png',
+              width: 30,
+              height: 30,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
+            SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onSubmitted: _searchBooks,
+                cursorColor: Colors.grey,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  hintText: "도서를 검색하세요.",
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
       body: _isLoading

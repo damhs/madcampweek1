@@ -56,9 +56,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('독서 리뷰 앱'),
-      ),
       // 현재 탭에 해당하는 위젯만 표시
       body: _tabContents[_currentIndex],
 
@@ -71,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         // 선택/비선택 탭 색상 (테마 기본값 등 적용)
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Color(0xFF33CCCC),
         unselectedItemColor: Colors.grey,
 
         items: const [
