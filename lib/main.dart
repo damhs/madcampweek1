@@ -17,10 +17,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Pretendard',
         textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontSize: 16.0, color: Color.fromARGB(255, 0, 0, 0)),
-          bodyMedium: TextStyle(fontSize: 14.0, color: Color.fromARGB(255, 0, 0, 0)),
+          bodyLarge:
+              TextStyle(fontSize: 16.0, color: Color.fromARGB(255, 0, 0, 0)),
+          bodyMedium:
+              TextStyle(fontSize: 14.0, color: Color.fromARGB(255, 0, 0, 0)),
         ),
       ),
       home: const MainScreen(),
@@ -66,32 +69,36 @@ class _MainScreenState extends State<MainScreen> {
       // 현재 탭에 해당하는 위젯만 표시
       body: _tabContents[_currentIndex],
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        // 탭을 클릭하면 상태 변경
-        onTap: (int index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        // 선택/비선택 탭 색상 (테마 기본값 등 적용)
-        selectedItemColor: Color(0xFF33CCCC),
-        unselectedItemColor: Colors.grey,
+      bottomNavigationBar: SizedBox(
+        height: 100,
+        child: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          currentIndex: _currentIndex,
+          // 탭을 클릭하면 상태 변경
+          onTap: (int index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          // 선택/비선택 탭 색상 (테마 기본값 등 적용)
+          selectedItemColor: Color(0xFF33CCCC),
+          unselectedItemColor: Colors.grey,
 
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: '검색',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.photo_library),
-            label: '갤러리',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.edit),
-            label: '리뷰',
-          ),
-        ],
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: '검색',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.photo_library),
+              label: '갤러리',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.edit),
+              label: '리뷰',
+            ),
+          ],
+        ),
       ),
     );
   }

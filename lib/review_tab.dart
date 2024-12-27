@@ -11,7 +11,8 @@ class ReviewTab extends StatefulWidget {
   State<ReviewTab> createState() => _ReviewTabState();
 }
 
-class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixin {
+class _ReviewTabState extends State<ReviewTab>
+    with AutomaticKeepAliveClientMixin {
   List<Map<String, String>> _reviews = [];
   bool isSelectionMode = false;
   final Set<int> selectedIndexes = {};
@@ -61,7 +62,9 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
   // 선택된 리뷰 삭제
   void _deleteSelectedReviews() {
     setState(() {
-      _reviews = _reviews.asMap().entries
+      _reviews = _reviews
+          .asMap()
+          .entries
           .where((entry) => !selectedIndexes.contains(entry.key))
           .map((entry) => entry.value)
           .toList();
@@ -85,10 +88,14 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     Map<String, String>? currentReview,
     required void Function(Map<String, String>) onSubmit,
   }) {
-    final titleController = TextEditingController(text: currentReview?['title']);
-    final authorController = TextEditingController(text: currentReview?['author']);
-    final genreController = TextEditingController(text: currentReview?['genre']);
-    final contentController = TextEditingController(text: currentReview?['content']);
+    final titleController =
+        TextEditingController(text: currentReview?['title']);
+    final authorController =
+        TextEditingController(text: currentReview?['author']);
+    final genreController =
+        TextEditingController(text: currentReview?['genre']);
+    final contentController =
+        TextEditingController(text: currentReview?['content']);
 
     showDialog(
       context: context,
@@ -104,7 +111,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
                 const SizedBox(height: 12),
                 _buildTextField(controller: genreController, label: '장르'),
                 const SizedBox(height: 12),
-                _buildTextField(controller: contentController, label: '리뷰 내용', maxLines: 5),
+                _buildTextField(
+                    controller: contentController, label: '리뷰 내용', maxLines: 5),
               ],
             ),
           ),
@@ -123,7 +131,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
                     'title': titleController.text,
                     'author': authorController.text,
                     'genre': genreController.text,
-                    'date': currentReview?['date'] ?? DateTime.now().toString().split(' ')[0],
+                    'date': currentReview?['date'] ??
+                        DateTime.now().toString().split(' ')[0],
                     'content': contentController.text,
                   });
                   Navigator.of(context).pop();
@@ -206,7 +215,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
                   children: [
                     Text(
                       review['title'] ?? '제목 없음',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -214,11 +224,13 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
                       children: [
                         Text(
                           review['author'] ?? '작가 정보 없음',
-                          style: const TextStyle(fontSize: 14, color: Colors.black),
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.black),
                         ),
                         Text(
                           review['genre'] ?? '장르 정보 없음',
-                          style: const TextStyle(fontSize: 14, color: Colors.black),
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.black),
                         ),
                       ],
                     ),
@@ -227,7 +239,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
                       alignment: Alignment.bottomRight,
                       child: Text(
                         review['date'] ?? '날짜 정보 없음',
-                        style: const TextStyle(fontSize: 12, color: Colors.black),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.black),
                       ),
                     ),
                   ],
@@ -245,16 +258,19 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
     super.build(context);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(isSelectionMode ? '리뷰 선택' : '나의 리뷰'),
         actions: isSelectionMode
             ? [
                 TextButton(
                   onPressed: _toggleSelectionMode,
-                  child: const Text('취소', style: TextStyle(color: Colors.black)),
+                  child:
+                      const Text('취소', style: TextStyle(color: Colors.black)),
                 ),
                 TextButton(
                   onPressed: _deleteSelectedReviews,
-                  child: const Text('삭제', style: TextStyle(color: Colors.black)),
+                  child:
+                      const Text('삭제', style: TextStyle(color: Colors.black)),
                 ),
               ]
             : [
@@ -268,7 +284,8 @@ class _ReviewTabState extends State<ReviewTab> with AutomaticKeepAliveClientMixi
           ? const Center(child: Text('저장된 리뷰가 없습니다.'))
           : ListView.builder(
               itemCount: _reviews.length,
-              itemBuilder: (context, index) => _buildReviewCard(_reviews[index], index),
+              itemBuilder: (context, index) =>
+                  _buildReviewCard(_reviews[index], index),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -328,7 +345,8 @@ class ReviewDetailPage extends StatelessWidget {
               const SizedBox(height: 12),
               _buildTextField(controller: genreController, label: '장르'),
               const SizedBox(height: 12),
-              _buildTextField(controller: contentController, label: '리뷰 내용', maxLines: 5),
+              _buildTextField(
+                  controller: contentController, label: '리뷰 내용', maxLines: 5),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {

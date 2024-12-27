@@ -124,6 +124,7 @@ class _GalleryTabState extends State<GalleryTab> {
                     items[index]['description']!,
                     style: const TextStyle(fontSize: 16),
                   ),
+                  const SizedBox(height: 8),
                 ],
               );
             },
