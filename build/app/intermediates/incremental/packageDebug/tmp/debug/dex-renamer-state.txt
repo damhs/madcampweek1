@@ -1,4 +1,4 @@
-#Fri Dec 27 13:18:18 KST 2024
+#Fri Dec 27 14:15:51 KST 2024
 base.0=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeExtDexDebug/classes.dex
 base.1=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeLibDexDebug/0/classes.dex
 base.2=/Users/sanghyuk/Documents/GitHub/madcampweek1/build/app/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
