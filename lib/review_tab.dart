@@ -86,68 +86,6 @@ class _ReviewTabState extends State<ReviewTab>
   }
 
   // 리뷰 추가 및 수정 다이얼로그 표시
-  void _showReviewDialog({
-    required String title,
-    Map<String, String>? currentReview,
-    required void Function(Map<String, String>) onSubmit,
-  }) {
-    final titleController =
-        TextEditingController(text: currentReview?['title']);
-    final authorController =
-        TextEditingController(text: currentReview?['author']);
-    final genreController =
-        TextEditingController(text: currentReview?['genre']);
-    final contentController =
-        TextEditingController(text: currentReview?['content']);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildTextField(controller: titleController, label: '책 제목'),
-                const SizedBox(height: 12),
-                _buildTextField(controller: authorController, label: '작가'),
-                const SizedBox(height: 12),
-                _buildTextField(controller: genreController, label: '장르'),
-                const SizedBox(height: 12),
-                _buildTextField(
-                    controller: contentController, label: '리뷰 내용', maxLines: 5),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty &&
-                    authorController.text.isNotEmpty &&
-                    genreController.text.isNotEmpty &&
-                    contentController.text.isNotEmpty) {
-                  onSubmit({
-                    'title': titleController.text,
-                    'author': authorController.text,
-                    'genre': genreController.text,
-                    'date': currentReview?['date'] ??
-                        DateTime.now().toString().split(' ')[0],
-                    'content': contentController.text,
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('저장'),
-            ),
-          ],
-        );
-      },
-    );
-  }
   void _sortReviews(String criteria) {
     setState(() {
       if (_sortCriteria == criteria) {
@@ -178,20 +116,6 @@ class _ReviewTabState extends State<ReviewTab>
     });
   }
   // 공통 텍스트 필드 생성
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
 
   // 리뷰 카드 생성
   Widget _buildReviewCard(Map<String, String> review, int index) {
@@ -209,7 +133,7 @@ class _ReviewTabState extends State<ReviewTab>
             MaterialPageRoute(
               builder: (context) => ReviewDetailPage(
                 review: review,
-                onUpdate: (updatedReview) => _editReview(index, updatedReview),
+                onSubmit: (updatedReview) => _editReview(index, updatedReview),
                 onDelete: () {
                   _deleteReview(index);
                   Navigator.of(context).pop();
@@ -352,9 +276,14 @@ class _ReviewTabState extends State<ReviewTab>
           ),
     floatingActionButton: FloatingActionButton(
       onPressed: () {
-        _showReviewDialog(
-          title: '리뷰 추가',
-          onSubmit: _addReview,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReviewDetailPage(
+              review: null,
+              onSubmit: _addReview,
+          ),
+        ),
         );
       },
       backgroundColor: const Color(0xFF33CCCC),
@@ -362,42 +291,40 @@ class _ReviewTabState extends State<ReviewTab>
     ),
   );
 }
-
-
-
   @override
   bool get wantKeepAlive => true;
 }
 
 class ReviewDetailPage extends StatelessWidget {
-  final Map<String, String> review;
-  final void Function(Map<String, String>) onUpdate;
-  final VoidCallback onDelete;
+  final Map<String, String>? review;
+  final void Function(Map<String, String>) onSubmit;
+  final VoidCallback? onDelete;
 
   const ReviewDetailPage({
     Key? key,
-    required this.review,
-    required this.onUpdate,
-    required this.onDelete,
+    this.review,
+    required this.onSubmit,
+    this.onDelete,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final titleController = TextEditingController(text: review['title']);
-    final authorController = TextEditingController(text: review['author']);
-    final genreController = TextEditingController(text: review['genre']);
-    final contentController = TextEditingController(text: review['content']);
+    final titleController = TextEditingController(text: review?['title']);
+    final authorController = TextEditingController(text: review?['author']);
+    final genreController = TextEditingController(text: review?['genre']);
+    final contentController = TextEditingController(text: review?['content']);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('리뷰 상세'),
-        actions: [
+        //title: const Text('리뷰 상세'),
+        actions: review != null && onDelete != null
+        ? [
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: onDelete,
           ),
-        ],
+        ] : null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -419,11 +346,11 @@ class ReviewDetailPage extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      onUpdate({
+                      onSubmit({
                         'title': titleController.text,
                         'author': authorController.text,
                         'genre': genreController.text,
-                        'date': review['date']!,
+                        'date': review?['date'] ?? DateTime.now().toString().split(' ')[0],
                         'content': contentController.text,
                       });
                       Navigator.of(context).pop();
