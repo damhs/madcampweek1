@@ -23,7 +23,7 @@ class _SearchTabState extends State<SearchTab> {
     const apiKey =
         'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키 입력
     final url = Uri.parse(
-        'https://www.googleapis.com/books/v1/volumes?q=$query&key=$apiKey');
+        'https://www.googleapis.com/books/v1/volumes?q=$query&maxResults=40&key=$apiKey');
 
     try {
       final response = await http.get(url);
