@@ -11,6 +11,9 @@ class ReviewTab extends StatefulWidget {
   State<ReviewTab> createState() => _ReviewTabState();
 }
 
+String _sortCriteria = 'date';
+bool _isAscending = true;
+
 class _ReviewTabState extends State<ReviewTab>
     with AutomaticKeepAliveClientMixin {
   List<Map<String, String>> _reviews = [];
@@ -145,7 +148,35 @@ class _ReviewTabState extends State<ReviewTab>
       },
     );
   }
-
+  void _sortReviews(String criteria) {
+    setState(() {
+      if (_sortCriteria == criteria) {
+        _isAscending = !_isAscending;
+      } else {
+        _sortCriteria = criteria;
+        _isAscending = true;
+      }
+      _reviews.sort((a, b) {
+        int comparison;
+        switch (_sortCriteria) {
+          case 'title':
+            comparison = a['title']!.compareTo(b['title']!);
+            break;
+          case 'author':
+            comparison = a['author']!.compareTo(b['author']!);
+            break;
+          case 'genre':
+            comparison = a['genre']!.compareTo(b['genre']!);
+            break;
+          case 'date':         
+          default:
+            comparison = a['date']!.compareTo(b['date']!);
+            break;
+        }
+        return _isAscending ? comparison : -comparison;
+      });
+    });
+  }
   // 공통 텍스트 필드 생성
   Widget _buildTextField({
     required TextEditingController controller,
@@ -240,7 +271,7 @@ class _ReviewTabState extends State<ReviewTab>
                       child: Text(
                         review['date'] ?? '날짜 정보 없음',
                         style:
-                            const TextStyle(fontSize: 12, color: Colors.black),
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ),
                   ],
@@ -255,50 +286,84 @@ class _ReviewTabState extends State<ReviewTab>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(isSelectionMode ? '리뷰 선택' : '나의 리뷰'),
-        actions: isSelectionMode
-            ? [
-                TextButton(
-                  onPressed: _toggleSelectionMode,
-                  child:
-                      const Text('취소', style: TextStyle(color: Colors.black)),
+  super.build(context);
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.white,
+      title: Text(isSelectionMode ? '리뷰 선택' : '나의 리뷰'),
+      actions: isSelectionMode
+          ? [
+              TextButton(
+                onPressed: _toggleSelectionMode,
+                child: const Text('취소', style: TextStyle(color: Colors.black)),
+              ),
+              TextButton(
+                onPressed: _deleteSelectedReviews,
+                child: const Text('삭제', style: TextStyle(color: Colors.black)),
+              ),
+            ]
+          : [
+              PopupMenuButton<String>(
+                shape: RoundedRectangleBorder(
+                  //side: const BorderSide(width: 1, color: Color(0xFF33CCCC)),
                 ),
-                TextButton(
-                  onPressed: _deleteSelectedReviews,
-                  child:
-                      const Text('삭제', style: TextStyle(color: Colors.black)),
-                ),
-              ]
-            : [
-                IconButton(
-                  icon: const Icon(Icons.checklist),
-                  onPressed: _toggleSelectionMode,
-                ),
-              ],
-      ),
-      body: _reviews.isEmpty
-          ? const Center(child: Text('저장된 리뷰가 없습니다.'))
-          : ListView.builder(
-              itemCount: _reviews.length,
-              itemBuilder: (context, index) =>
-                  _buildReviewCard(_reviews[index], index),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showReviewDialog(
-            title: '리뷰 추가',
-            onSubmit: _addReview,
-          );
-        },
-        backgroundColor: Color(0xFF33CCCC),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
+                color: Colors.white,
+                icon: const Icon(Icons.sort, color: Colors.purple),
+                onSelected: _sortReviews,
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem(
+                    value: 'title',
+                    child: Text(
+                      '제목 ${_sortCriteria == 'title' ? (_isAscending ? '▾' : '▴') : ''}', 
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'author',
+                    child: Text(
+                      '작가 ${_sortCriteria == 'author' ? (_isAscending ? '▾' : '▴') : ''}', 
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'genre',
+                    child: Text(
+                      '장르 ${_sortCriteria == 'genre' ? (_isAscending ? '▾' : '▴') : ''}',
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'date',
+                    child: Text(
+                      '날짜 ${_sortCriteria == 'date' ? (_isAscending ? '▾' : '▴') : ''}',
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.check_circle_outline, color: Colors.purple),
+                onPressed: _toggleSelectionMode,
+              ),
+            ],
+    ),
+    body: _reviews.isEmpty
+        ? const Center(child: Text('저장된 리뷰가 없습니다.'))
+        : ListView.builder(
+            itemCount: _reviews.length,
+            itemBuilder: (context, index) =>
+                _buildReviewCard(_reviews[index], index),
+          ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        _showReviewDialog(
+          title: '리뷰 추가',
+          onSubmit: _addReview,
+        );
+      },
+      backgroundColor: const Color(0xFF33CCCC),
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
+  );
+}
+
+
 
   @override
   bool get wantKeepAlive => true;
@@ -325,6 +390,7 @@ class ReviewDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('리뷰 상세'),
         actions: [
           IconButton(
@@ -348,18 +414,27 @@ class ReviewDetailPage extends StatelessWidget {
               _buildTextField(
                   controller: contentController, label: '리뷰 내용', maxLines: 5),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  onUpdate({
-                    'title': titleController.text,
-                    'author': authorController.text,
-                    'genre': genreController.text,
-                    'date': review['date']!,
-                    'content': contentController.text,
-                  });
-                  Navigator.of(context).pop();
-                },
-                child: const Text('저장'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      onUpdate({
+                        'title': titleController.text,
+                        'author': authorController.text,
+                        'genre': genreController.text,
+                        'date': review['date']!,
+                        'content': contentController.text,
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('저장'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                    )
+                  ),
+                ],
               ),
             ],
           ),
