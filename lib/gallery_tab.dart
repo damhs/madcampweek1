@@ -20,7 +20,7 @@ class _GalleryTabState extends State<GalleryTab>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  bool isEditing = false;
+
   TextEditingController _descriptionController = TextEditingController();
 
   List<Map<String, String>> items = [];
@@ -28,7 +28,7 @@ class _GalleryTabState extends State<GalleryTab>
   void initState() {
     super.initState();
     _loadImages();
-    isEditing = false;
+
     _descriptionController = TextEditingController(text: '');
   }
 
@@ -112,7 +112,7 @@ class _GalleryTabState extends State<GalleryTab>
       final XFile? pickedFile =
           await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
-        isEditing = true;
+        _descriptionController.text = '';
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -220,20 +220,10 @@ class _GalleryTabState extends State<GalleryTab>
               },
             ),
             IconButton(
-              icon: Icon(isEditing ? Icons.save : Icons.edit),
-              color: isEditing ? Color(0xFF33CCCC) : Colors.purple,
+              icon: Icon(Icons.save),
+              color: Colors.purple,
               onPressed: () {
-                if (isEditing) {
-                  setState(() {
-                    isEditing = false;
-                  });
-                  _editImage(index, _descriptionController.text);
-                } else {
-                  setState(() {
-                    isEditing = true;
-                    _descriptionController.text = description;
-                  });
-                }
+                _editImage(index, _descriptionController.text);
               },
             ),
           ],
@@ -248,19 +238,14 @@ class _GalleryTabState extends State<GalleryTab>
             Image.file(File(image)),
             Padding(
               padding: const EdgeInsets.all(10.0),
-              child: isEditing
-                  ? TextField(
-                      controller: _descriptionController,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: '설명을 입력하세요.',
-                      ),
-                    )
-                  : Text(
-                      _descriptionController.text,
-                      style: const TextStyle(fontSize: 16.0),
-                    ),
+              child: TextField(
+                controller: _descriptionController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '설명을 입력하세요.',
+                ),
+              ),
             ),
           ],
         ),
