@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+
+late SharedPreferences prefs;
 
 class GalleryTab extends StatefulWidget {
   GalleryTab({Key? key}) : super(key: key);
@@ -12,40 +16,68 @@ class GalleryTab extends StatefulWidget {
   _GalleryTabState createState() => _GalleryTabState();
 }
 
-class _GalleryTabState extends State<GalleryTab> {
-  // 초기 이미지와 설명 리스트
-  final List<Map<String, String>> items = [
-    {
-      'image': 'img/img1.jpeg',
-      'description': '자유로부터의 도피',
-      'timestamp': '2024-12-28 12:00:00'
-    },
-    {
-      'image': 'img/img2.jpeg',
-      'description': '모비딕',
-      'timestamp': '2024-12-28 12:00:00'
-    },
-    {
-      'image': 'img/img3.jpeg',
-      'description': '채식주의자',
-      'timestamp': '2024-12-28 12:00:00'
-    },
-    {
-      'image': 'img/img4.jpeg',
-      'description': '철학',
-      'timestamp': '2024-12-28 12:00:00'
-    },
-    {
-      'image': 'img/img5.jpeg',
-      'description': '채식주의자',
-      'timestamp': '2024-12-28 12:00:00'
-    },
-    {
-      'image': 'img/img6.jpeg',
-      'description': '철학',
-      'timestamp': '2024-12-28 12:00:00'
-    },
-  ];
+class _GalleryTabState extends State<GalleryTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  List<Map<String, String>> items = [];
+
+  void initState() {
+    super.initState();
+    _loadImages();
+  }
+
+  Future<void> _loadImages() async {
+    prefs = await SharedPreferences.getInstance();
+    final List<String>? images = prefs.getStringList('images');
+    if (images != null) {
+      setState(() {
+        items = images.map((image) {
+          final List<String> parts = image.split(',');
+          return {
+            'image': parts[0],
+            'description': parts[1],
+            'timestamp': parts[2],
+          };
+        }).toList();
+      });
+    }
+  }
+
+  Future<void> _saveImages() async {
+    await prefs.setStringList(
+      'images',
+      items.map((item) {
+        return '${item['image']},${item['description']},${item['timestamp']}';
+      }).toList(),
+    );
+  }
+
+  void _addImage(String image, String description, String timestamp) {
+    setState(() {
+      items.add({
+        'image': image,
+        'description': description,
+        'timestamp': timestamp,
+      });
+    });
+    _saveImages();
+  }
+
+  void _editDescription(int index, String description) {
+    setState(() {
+      items[index]['description'] = description;
+    });
+    _saveImages();
+  }
+
+  void _deleteImage(int index) {
+    setState(() {
+      items.removeAt(index);
+    });
+    _saveImages();
+  }
 
   final ImagePicker _picker = ImagePicker();
 
@@ -53,7 +85,10 @@ class _GalleryTabState extends State<GalleryTab> {
   Future<void> _pickImage() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    final int androidVersion = int.parse(androidInfo.version.release);
+    print(androidInfo);
+    print(androidInfo.version.release);
+    final int androidVersion =
+        int.parse(androidInfo.version.release.split('.')[0]);
     bool havePermission = false;
 
     if (androidVersion >= 13) {
@@ -74,13 +109,8 @@ class _GalleryTabState extends State<GalleryTab> {
         if (description == null) {
           return;
         }
-        setState(() {
-          items.add({
-            'image': pickedFile.path,
-            'description': description,
-            'timestamp': DateTime.now().toString()
-          });
-        });
+        _addImage(pickedFile.path, description,
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,73 +159,25 @@ class _GalleryTabState extends State<GalleryTab> {
         title: const Text('나의 독서 모음'),
         backgroundColor: Colors.white,
       ),
-      body: Container(
-        width: sizeX,
-        height: sizeY,
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 5.0,
-            mainAxisSpacing: 5.0,
-            childAspectRatio: 1.0,
-          ),
-          itemCount: items.length,
-          padding: const EdgeInsets.all(5.0),
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailPage(
-                      image: items[index]['image']!,
-                      description: items[index]['description']!,
-                    ),
-                  ),
-                );
-              },
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: index < 6
-                            ? AssetImage(items[index]['image']!)
-                                as ImageProvider
-                            : FileImage(File(items[index]['image']!)),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 1.5,
-                      ),
-                    ),
-                    margin: const EdgeInsets.all(5.0),
-                  ),
-                  Positioned(
-                    bottom: 5,
-                    left: 5,
-                    child: Container(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Text(
-                        items[index]['timestamp']!,
-                        style: const TextStyle(
-                          fontSize: 12.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+      body: items.isEmpty
+          ? const Center(child: Text('저장된 사진이 없습니다.'))
+          : Container(
+              width: sizeX,
+              height: sizeY,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: items.length,
+                padding: const EdgeInsets.all(5.0),
+                itemBuilder: (context, index) {
+                  return _buildImage(items: items, index: index);
+                },
               ),
-            );
-          },
-        ),
-      ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _pickImage,
         backgroundColor: Color(0xFF33CCCC),
@@ -205,36 +187,110 @@ class _GalleryTabState extends State<GalleryTab> {
   }
 }
 
-class DetailPage extends StatelessWidget {
+class _buildImage extends StatelessWidget {
+  const _buildImage({
+    super.key,
+    required this.items,
+    required this.index,
+  });
+
+  final List<Map<String, String>> items;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryDetailPage(
+              image: items[index]['image']!,
+              description: items[index]['description']!,
+              timestamp: items[index]['timestamp']!,
+            ),
+          ),
+        );
+      },
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: FileImage(File(items[index]['image']!)),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.white,
+                width: 1.5,
+              ),
+            ),
+            margin: const EdgeInsets.all(5.0),
+          ),
+          Positioned(
+            bottom: 5,
+            left: 5,
+            child: Container(
+              padding: const EdgeInsets.all(5.0),
+              child: Text(
+                items[index]['timestamp']!,
+                style: const TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GalleryDetailPage extends StatelessWidget {
   final String image;
   final String description;
+  final String timestamp;
 
-  const DetailPage({Key? key, required this.image, required this.description})
+  const GalleryDetailPage(
+      {Key? key,
+      required this.image,
+      required this.description,
+      required this.timestamp})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('상세보기'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('독서 정보'),
+            Text(
+              timestamp,
+              style: const TextStyle(fontSize: 12.0),
+            ),
+          ],
+        ),
         backgroundColor: Colors.white,
       ),
-      body: Center(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(image!) as ImageProvider,
-                  fit: BoxFit.cover,
-                ),
+            Image.file(File(image)),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                description,
+                style: const TextStyle(fontSize: 16.0),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              description,
-              style: const TextStyle(fontSize: 20),
             ),
           ],
         ),
