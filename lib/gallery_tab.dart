@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 late SharedPreferences prefs;
 
 class GalleryTab extends StatefulWidget {
-  GalleryTab({Key? key}) : super(key: key);
+  const GalleryTab({Key? key}) : super(key: key);
 
   @override
   _GalleryTabState createState() => _GalleryTabState();
@@ -98,8 +98,6 @@ class _GalleryTabState extends State<GalleryTab>
       final status = await Permission.storage.request();
       havePermission = status.isGranted;
     }
-
-    // 권한 요청
     print("권한 요청");
     if (havePermission) {
       final XFile? pickedFile =
@@ -150,61 +148,15 @@ class _GalleryTabState extends State<GalleryTab>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final sizeX = MediaQuery.of(context).size.width;
-    final sizeY = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('나의 독서 모음'),
-        backgroundColor: Colors.white,
-      ),
-      body: items.isEmpty
-          ? const Center(child: Text('저장된 사진이 없습니다.'))
-          : Container(
-              width: sizeX,
-              height: sizeY,
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 5.0,
-                  mainAxisSpacing: 5.0,
-                  childAspectRatio: 1.0,
-                ),
-                itemCount: items.length,
-                padding: const EdgeInsets.all(5.0),
-                itemBuilder: (context, index) {
-                  return _buildImage(items: items, index: index);
-                },
-              ),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pickImage,
-        backgroundColor: Color(0xFF33CCCC),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-}
-
-class _buildImage extends StatelessWidget {
-  const _buildImage({
-    super.key,
-    required this.items,
-    required this.index,
-  });
-
-  final List<Map<String, String>> items;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildImage(
+      {required List<Map<String, String>> items, required int index}) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => GalleryDetailPage(
+              index: index,
               image: items[index]['image']!,
               description: items[index]['description']!,
               timestamp: items[index]['timestamp']!,
@@ -249,31 +201,44 @@ class _buildImage extends StatelessWidget {
       ),
     );
   }
-}
 
-class GalleryDetailPage extends StatelessWidget {
-  final String image;
-  final String description;
-  final String timestamp;
-
-  const GalleryDetailPage(
-      {Key? key,
-      required this.image,
-      required this.description,
-      required this.timestamp})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget GalleryDetailPage({
+    required int index,
+    required String image,
+    required String description,
+    required String timestamp,
+  }) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Text('독서 정보'),
-            Text(
-              timestamp,
-              style: const TextStyle(fontSize: 12.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('독서 정보'),
+                Text(
+                  timestamp,
+                  style: const TextStyle(fontSize: 12.0),
+                ),
+              ],
+            ),
+            Spacer(),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              color: Colors.red,
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteImage(index);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              color: Colors.purple,
+              onPressed: () {
+                Navigator.pop(context);
+                _editDescription(index, description);
+              },
             ),
           ],
         ),
@@ -294,6 +259,42 @@ class GalleryDetailPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sizeX = MediaQuery.of(context).size.width;
+    final sizeY = MediaQuery.of(context).size.height;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('나의 독서 모음'),
+        backgroundColor: Colors.white,
+      ),
+      body: items.isEmpty
+          ? const Center(child: Text('저장된 사진이 없습니다.'))
+          : Container(
+              width: sizeX,
+              height: sizeY,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: items.length,
+                padding: const EdgeInsets.all(5.0),
+                itemBuilder: (context, index) {
+                  return _buildImage(items: items, index: index);
+                },
+              ),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pickImage,
+        backgroundColor: Color(0xFF33CCCC),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
