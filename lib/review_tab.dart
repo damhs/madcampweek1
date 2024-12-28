@@ -45,7 +45,7 @@ class _ReviewTabState extends State<ReviewTab>
   }
 
   // 리뷰 추가
-  void _addReview(Map<String, String> newReview) {
+  void addReview(Map<String, String> newReview) {
     setState(() => _reviews.add(newReview));
     _saveReviews();
   }
@@ -281,7 +281,7 @@ class _ReviewTabState extends State<ReviewTab>
           MaterialPageRoute(
             builder: (context) => ReviewDetailPage(
               review: null,
-              onSubmit: _addReview,
+              onSubmit: addReview,
           ),
         ),
         );

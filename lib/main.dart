@@ -5,7 +5,9 @@ import 'gallery_tab.dart';
 import 'review_tab.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const MyApp()
+    );
 }
 
 // 전체 앱 구성

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:madcampweek1/gallery_tab.dart';
+import 'package:madcampweek1/review_tab.dart';
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -8,7 +10,62 @@ class SearchTab extends StatefulWidget {
   @override
   State<SearchTab> createState() => _SearchTabState();
 }
-
+void _showBookOptions(BuildContext context, Map<String, dynamic> book){
+  final Map<String, String> stringBook = {
+    'title': book['title'] ?? '제목 없음',
+    'authors': book['authors']?.join(', ') ?? '작가 정보 없음',
+    'genre': book['categories']?.join(', ') ?? '장르 정보 없음',
+  };
+  showDialog(
+    context: context,
+    builder: (BuildContext context){
+      return AlertDialog(
+        title: Text('기록하기'),
+        content: const Text('이 도서를 어떻게 기록하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('취소'),
+            ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GalleryTab(),
+                ),
+              );
+            },
+            child: const Text('사진으로 기록'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReviewDetailPage(
+                    review: {
+                      'title': stringBook['title'] ?? '제목 없음',
+                      'author': stringBook['authors'] ?? '작가 정보 없음',
+                      'genre': stringBook['genre'] ?? '장르 정보 없음',
+                      'content': '',
+                    },
+                    onSubmit: (newReview) {
+                      //Navigator.pop(context, newReview);
+                    },
+                  ),
+                ),
+              );
+            },
+            child: const Text('텍스트로 기록'),
+          ),
+        ],
+      );
+    },
+  );
+}
 class _SearchTabState extends State<SearchTab> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _books = [];
@@ -58,7 +115,7 @@ class _SearchTabState extends State<SearchTab> {
         title: Row(
           children: [
             Image.asset(
-              'img/dokki_logo.png',
+              'assets/img/dokki_logo.png',
               width: 30,
               height: 30,
             ),
@@ -92,7 +149,7 @@ class _SearchTabState extends State<SearchTab> {
               : ListView.builder(
                   itemCount: _books.length,
                   itemBuilder: (context, index) {
-                    final book = _books[index]['volumeInfo'];
+                    final Map<String, dynamic> book = _books[index]['volumeInfo'] ?? {};
                     return ListTile(
                       leading: book['imageLinks'] != null
                           ? Image.network(
@@ -104,9 +161,7 @@ class _SearchTabState extends State<SearchTab> {
                           : Icon(Icons.book, size: 50),
                       title: Text(book['title'] ?? '제목 없음'),
                       subtitle: Text(book['authors']?.join(', ') ?? '작가 정보 없음'),
-                      onTap: () {
-                        // 도서 상세 정보 페이지 이동 가능
-                      },
+                      onTap: () => _showBookOptions(context, book),
                     );
                   },
                 ),
