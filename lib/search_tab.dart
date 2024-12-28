@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:madcampweek1/gallery_tab.dart';
-import 'package:madcampweek1/review_tab.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
+import 'review_tab.dart';
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -10,62 +11,7 @@ class SearchTab extends StatefulWidget {
   @override
   State<SearchTab> createState() => _SearchTabState();
 }
-void _showBookOptions(BuildContext context, Map<String, dynamic> book){
-  final Map<String, String> stringBook = {
-    'title': book['title'] ?? '제목 없음',
-    'authors': book['authors']?.join(', ') ?? '작가 정보 없음',
-    'genre': book['categories']?.join(', ') ?? '장르 정보 없음',
-  };
-  showDialog(
-    context: context,
-    builder: (BuildContext context){
-      return AlertDialog(
-        title: Text('기록하기'),
-        content: const Text('이 도서를 어떻게 기록하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
-            ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GalleryTab(),
-                ),
-              );
-            },
-            child: const Text('사진으로 기록'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReviewDetailPage(
-                    review: {
-                      'title': stringBook['title'] ?? '제목 없음',
-                      'author': stringBook['authors'] ?? '작가 정보 없음',
-                      'genre': stringBook['genre'] ?? '장르 정보 없음',
-                      'content': '',
-                    },
-                    onSubmit: (newReview) {
-                      //Navigator.pop(context, newReview);
-                    },
-                  ),
-                ),
-              );
-            },
-            child: const Text('텍스트로 기록'),
-          ),
-        ],
-      );
-    },
-  );
-}
+
 class _SearchTabState extends State<SearchTab> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _books = [];
@@ -77,8 +23,7 @@ class _SearchTabState extends State<SearchTab> {
       _isLoading = true;
     });
 
-    const apiKey =
-        'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키 입력
+    const apiKey = 'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키
     final url = Uri.parse(
         'https://www.googleapis.com/books/v1/volumes?q=$query&maxResults=40&key=$apiKey');
 
@@ -106,6 +51,61 @@ class _SearchTabState extends State<SearchTab> {
     }
   }
 
+  // 책 선택 옵션
+  void _showBookOptions(BuildContext context, Map<String, dynamic> book) {
+    final Map<String, String> stringBook = {
+      'title': book['title'] ?? '제목 없음',
+      'author': (book['authors'] as List<dynamic>?)?.join(', ') ?? '작가 정보 없음',
+      'genre': (book['categories'] as List<dynamic>?)?.join(', ') ?? '장르 정보 없음',
+    };
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('기록하기'),
+          content: const Text('이 도서를 어떻게 기록하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('취소'),
+            ),
+            /*
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                DefaultTabController.of(context)?.animateTo(1); // 갤러리 탭으로 이동
+              },
+              child: const Text('사진으로 기록'),
+            ),
+            */
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewDetailPage(
+                      review: {
+                        'title': stringBook['title']!,
+                        'author': stringBook['author']!,
+                        'genre': stringBook['genre']!,
+                        'content': '',
+                      },
+                      onSubmit: (newReview) =>
+                          context.read<AppState>().addReview(newReview),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('텍스트로 기록'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,20 +119,20 @@ class _SearchTabState extends State<SearchTab> {
               width: 30,
               height: 30,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _searchController,
                 onSubmitted: _searchBooks,
                 cursorColor: Colors.grey,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   hintText: "도서를 검색하세요.",
-                  border: OutlineInputBorder(
+                  border: const OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey),
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -143,13 +143,14 @@ class _SearchTabState extends State<SearchTab> {
         ),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // 로딩 중 표시
+          ? const Center(child: CircularProgressIndicator()) // 로딩 중 표시
           : _books.isEmpty
-              ? Center(child: Text("검색 결과가 없습니다."))
+              ? const Center(child: Text("검색 결과가 없습니다."))
               : ListView.builder(
                   itemCount: _books.length,
                   itemBuilder: (context, index) {
-                    final Map<String, dynamic> book = _books[index]['volumeInfo'] ?? {};
+                    final Map<String, dynamic> book =
+                        _books[index]['volumeInfo'] ?? {};
                     return ListTile(
                       leading: book['imageLinks'] != null
                           ? Image.network(
@@ -158,9 +159,13 @@ class _SearchTabState extends State<SearchTab> {
                               width: 50,
                               height: 50,
                             )
-                          : Icon(Icons.book, size: 50),
+                          : const Icon(Icons.book, size: 50),
                       title: Text(book['title'] ?? '제목 없음'),
-                      subtitle: Text(book['authors']?.join(', ') ?? '작가 정보 없음'),
+                      subtitle: Text(
+                        (book['authors'] as List<dynamic>?)
+                                ?.join(', ') ??
+                            '작가 정보 없음',
+                      ),
                       onTap: () => _showBookOptions(context, book),
                     );
                   },
