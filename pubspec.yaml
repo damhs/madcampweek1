@@ -72,6 +72,13 @@ flutter:
     - img/img4.jpeg
     - img/img5.jpeg
     - img/img6.jpeg
+    - assets/fonts/
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.otf
+        - asset: assets/fonts/Pretendard-Bold.otf
+        - asset: assets/fonts/Pretendard-SemiBold.otf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
