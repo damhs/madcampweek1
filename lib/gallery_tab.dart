@@ -20,12 +20,21 @@ class _GalleryTabState extends State<GalleryTab>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+  bool isEditing = false;
+  TextEditingController _descriptionController = TextEditingController();
 
   List<Map<String, String>> items = [];
 
   void initState() {
     super.initState();
     _loadImages();
+    isEditing = false;
+    _descriptionController = TextEditingController(text: '');
+  }
+
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadImages() async {
@@ -65,7 +74,7 @@ class _GalleryTabState extends State<GalleryTab>
     _saveImages();
   }
 
-  void _editDescription(int index, String description) {
+  void _editImage(int index, String description) {
     setState(() {
       items[index]['description'] = description;
     });
@@ -103,11 +112,20 @@ class _GalleryTabState extends State<GalleryTab>
       final XFile? pickedFile =
           await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
-        String? description = await _showDescriptionDialog();
-        if (description == null) {
-          return;
-        }
-        _addImage(pickedFile.path, description,
+        isEditing = true;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryDetailPage(
+              index: items.length,
+              image: pickedFile.path,
+              description: '',
+              timestamp:
+                  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+            ),
+          ),
+        );
+        _addImage(pickedFile.path, _descriptionController.text,
             DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
       }
     } else {
@@ -115,37 +133,6 @@ class _GalleryTabState extends State<GalleryTab>
         const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
       );
     }
-  }
-
-  Future<String?> _showDescriptionDialog() async {
-    String? description;
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('설명 추가'),
-          content: TextField(
-            onChanged: (value) {
-              description = value;
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(description);
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Widget _buildImage(
@@ -233,11 +220,20 @@ class _GalleryTabState extends State<GalleryTab>
               },
             ),
             IconButton(
-              icon: const Icon(Icons.edit),
-              color: Colors.purple,
+              icon: Icon(isEditing ? Icons.save : Icons.edit),
+              color: isEditing ? Color(0xFF33CCCC) : Colors.purple,
               onPressed: () {
-                Navigator.pop(context);
-                _editDescription(index, description);
+                if (isEditing) {
+                  setState(() {
+                    isEditing = false;
+                  });
+                  _editImage(index, _descriptionController.text);
+                } else {
+                  setState(() {
+                    isEditing = true;
+                    _descriptionController.text = description;
+                  });
+                }
               },
             ),
           ],
@@ -252,10 +248,19 @@ class _GalleryTabState extends State<GalleryTab>
             Image.file(File(image)),
             Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Text(
-                description,
-                style: const TextStyle(fontSize: 16.0),
-              ),
+              child: isEditing
+                  ? TextField(
+                      controller: _descriptionController,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '설명을 입력하세요.',
+                      ),
+                    )
+                  : Text(
+                      _descriptionController.text,
+                      style: const TextStyle(fontSize: 16.0),
+                    ),
             ),
           ],
         ),
