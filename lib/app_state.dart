@@ -193,5 +193,35 @@ class AppState extends ChangeNotifier {
         const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
       );
     }
+}
+  //최근 검색어
+  List<String> _recentSearches = [];
+
+  List<String> get recentSearches => List.unmodifiable(_recentSearches);
+
+  Future<void> loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    _recentSearches = prefs.getStringList('recentSearches') ?? [];
+    notifyListeners();
+  }
+
+  Future<void> addRecentSearch(String query) async {
+    if(_recentSearches.contains(query)) {
+      _recentSearches.remove(query);
+    }
+    _recentSearches.insert(0, query);
+    if(_recentSearches.length > 10) {
+      _recentSearches.removeRange(10, _recentSearches.length);
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('recentSearches', _recentSearches);
+    notifyListeners();
+  }
+  
+  Future<void> clearRecentSearches() async {
+    _recentSearches.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('recentSearches');
+    notifyListeners();
   }
 }

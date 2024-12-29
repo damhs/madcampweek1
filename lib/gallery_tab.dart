@@ -89,7 +89,20 @@ class _GalleryTabState extends State<GalleryTab>
     final sizeY = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('나의 독서 모음'),
+        title: Row(
+        children: [
+          Image.asset(
+            'assets/img/dokki_logo.png',
+            width: 30,
+            height: 30,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '나의 독서 앨범',
+            style: const TextStyle(color: Colors.black),
+          ),
+        ],
+      ),
         backgroundColor: Colors.white,
       ),
       body: items.isEmpty

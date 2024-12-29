@@ -25,8 +25,21 @@ class _ReviewTabState extends State<ReviewTab>
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(isSelectionMode ? '리뷰 선택' : '나의 리뷰'),
+      backgroundColor: Colors.white,
+      title: Row(
+        children: [
+          Image.asset(
+            'assets/img/dokki_logo.png',
+            width: 30,
+            height: 30,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            isSelectionMode ? '리뷰 선택' : '나의 리뷰',
+            style: const TextStyle(color: Colors.black),
+          ),
+        ],
+      ),
         actions: isSelectionMode
             ? [
                 TextButton(

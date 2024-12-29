@@ -15,13 +15,44 @@ class SearchTab extends StatefulWidget {
 
 class _SearchTabState extends State<SearchTab> {
   final TextEditingController _searchController = TextEditingController();
+  bool _showRecentSearches = false;
   List<dynamic> _books = [];
   bool _isLoading = false;
+  final FocusNode _focusNode = FocusNode();
+  @override
+  void initState() {
+    super.initState();
+    context.read<AppState>().loadRecentSearches();
+    
+    _focusNode.addListener((){
+      if(_focusNode.hasFocus){
+        setState(() {
+        _showRecentSearches = true;
+        });
+      }
+    });
+  }
 
+  @override
+  void dispose(){
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onSearchSubmitted(String query) {
+    if (query.isNotEmpty) {
+      setState(() {
+        _showRecentSearches = false;
+      });
+      _searchBooks(query);
+      context.read<AppState>().addRecentSearch(query);
+    }
+  }
   // Google Books API 호출
   Future<void> _searchBooks(String query) async {
     setState(() {
       _isLoading = true;
+      _books = [];
     });
 
     const apiKey =
@@ -97,11 +128,11 @@ class _SearchTabState extends State<SearchTab> {
                       description: '',
                       timestamp: DateTime.now().toString(),
                       onDelete: (index) =>
-                          context.read<AppState>().deleteGalleryItem(index),
+                          context.read<AppState>().deleteImage(index),
                       onSave: (index, newDescription) => context
                           .read<AppState>()
-                          .editGalleryItem(
-                              index, {'description': newDescription}),
+                          .editImage(
+                              index, newDescription),
                     ),
                   ),
                 );
@@ -139,6 +170,7 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
+    final recentSearches = context.watch<AppState>().recentSearches;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -153,8 +185,9 @@ class _SearchTabState extends State<SearchTab> {
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
+                focusNode: _focusNode,
                 controller: _searchController,
-                onSubmitted: _searchBooks,
+                onSubmitted: _onSearchSubmitted,
                 cursorColor: Colors.grey,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
@@ -173,7 +206,21 @@ class _SearchTabState extends State<SearchTab> {
           ],
         ),
       ),
-      body: _isLoading
+      body: _showRecentSearches
+          ? ListView(
+              children: recentSearches
+                  .map(
+                    (query) => ListTile(
+                        title: Text(query),
+                        onTap: () {
+                          _searchController.text = query;
+                          _onSearchSubmitted(query);
+                        },
+                      ))
+                  .toList(),
+            )
+          : 
+      _isLoading
           ? const Center(child: CircularProgressIndicator()) // 로딩 중 표시
           : _books.isEmpty
               ? const Center(child: Text("검색 결과가 없습니다."))
