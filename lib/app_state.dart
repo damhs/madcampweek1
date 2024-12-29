@@ -196,16 +196,19 @@ class AppState extends ChangeNotifier {
 
   //최근 검색어
   List<String> _recentSearches = [];
-
+  bool _isSearchHistoryEnabled = true;
   List<String> get recentSearches => List.unmodifiable(_recentSearches);
+  bool get isSearchHistoryEnabled => _isSearchHistoryEnabled;
 
   Future<void> loadRecentSearches() async {
     final prefs = await SharedPreferences.getInstance();
     _recentSearches = prefs.getStringList('recentSearches') ?? [];
+    _isSearchHistoryEnabled = prefs.getBool('isSearchHistoryEnabled') ?? true;
     notifyListeners();
   }
 
   Future<void> addRecentSearch(String query) async {
+    if (!_isSearchHistoryEnabled) return;
     if (_recentSearches.contains(query)) {
       _recentSearches.remove(query);
     }
@@ -221,7 +224,22 @@ class AppState extends ChangeNotifier {
   Future<void> clearRecentSearches() async {
     _recentSearches.clear();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('recentSearches');
+    await prefs.setStringList('recentSearches', _recentSearches);
     notifyListeners();
   }
+
+  Future<void> toggleSearchHistory() async{
+    _isSearchHistoryEnabled = !_isSearchHistoryEnabled;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isSearchHistoryEnabled', _isSearchHistoryEnabled);
+    notifyListeners();
+  }
+
+  Future<void> removeRecentSearch(String query) async{
+    _recentSearches.remove(query);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('recentSearches', _recentSearches);
+    notifyListeners();
+  }
+
 }

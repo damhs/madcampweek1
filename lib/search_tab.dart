@@ -171,6 +171,7 @@ class _SearchTabState extends State<SearchTab> {
   @override
   Widget build(BuildContext context) {
     final recentSearches = context.watch<AppState>().recentSearches;
+    final isSearchHistoryEnabled = context.watch<AppState>().isSearchHistoryEnabled;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -207,44 +208,98 @@ class _SearchTabState extends State<SearchTab> {
         ),
       ),
       body: _showRecentSearches
-          ? ListView(
-              children: recentSearches
-                  .map((query) => ListTile(
+    ? context.watch<AppState>().isSearchHistoryEnabled
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 상단 버튼 영역: "검색어 저장 끄기"와 "전체 삭제"를 나란히 배치
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // 검색어 저장 끄기 버튼
+                    TextButton(
+                      onPressed: () {
+                        context.read<AppState>().toggleSearchHistory();
+                      },
+                      child: const Text("검색어 저장 끄기"),
+                    ),
+                    // 전체 삭제 버튼
+                    TextButton(
+                      onPressed: () {
+                        context.read<AppState>().clearRecentSearches();
+                      },
+                      child: const Text("전체 삭제"),
+                    ),
+                  ],
+                ),
+              ),
+              // 최근 검색어 리스트
+              Expanded(
+                child: ListView(
+                  children: context.watch<AppState>().recentSearches.map(
+                    (query) {
+                      return ListTile(
                         title: Text(query),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            context.read<AppState>().removeRecentSearch(query);
+                          },
+                        ),
                         onTap: () {
                           _searchController.text = query;
                           _onSearchSubmitted(query);
                         },
-                      ))
-                  .toList(),
-            )
-          : _isLoading
-              ? const Center(child: CircularProgressIndicator()) // 로딩 중 표시
-              : _books.isEmpty
-                  ? const Center(child: Text("검색 결과가 없습니다."))
-                  : ListView.builder(
-                      itemCount: _books.length,
-                      itemBuilder: (context, index) {
-                        final Map<String, dynamic> book =
-                            _books[index]['volumeInfo'] ?? {};
-                        return ListTile(
-                          leading: book['imageLinks'] != null
-                              ? Image.network(
-                                  book['imageLinks']['thumbnail'],
-                                  fit: BoxFit.cover,
-                                  width: 50,
-                                  height: 50,
-                                )
-                              : const Icon(Icons.book, size: 50),
-                          title: Text(book['title'] ?? '제목 없음'),
-                          subtitle: Text(
-                            (book['authors'] as List<dynamic>?)?.join(', ') ??
-                                '작가 정보 없음',
-                          ),
-                          onTap: () => _showBookOptions(context, book),
-                        );
-                      },
+                      );
+                    },
+                  ).toList(),
+                ),
+              ),
+            ],
+          )
+        : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("최근 검색어 기능이 꺼져 있습니다."),
+                TextButton(
+                  onPressed: () {
+                    context.read<AppState>().toggleSearchHistory();
+                  },
+                  child: const Text("검색어 저장 켜기"),
+                ),
+              ],
+            ),
+          )
+    : _isLoading
+        ? const Center(child: CircularProgressIndicator()) // 로딩 중 표시
+        : _books.isEmpty
+            ? const Center(child: Text("검색 결과가 없습니다."))
+            : ListView.builder(
+                itemCount: _books.length,
+                itemBuilder: (context, index) {
+                  final Map<String, dynamic> book =
+                      _books[index]['volumeInfo'] ?? {};
+                  return ListTile(
+                    leading: book['imageLinks'] != null
+                        ? Image.network(
+                            book['imageLinks']['thumbnail'],
+                            fit: BoxFit.cover,
+                            width: 50,
+                            height: 50,
+                          )
+                        : const Icon(Icons.book, size: 50),
+                    title: Text(book['title'] ?? '제목 없음'),
+                    subtitle: Text(
+                      (book['authors'] as List<dynamic>?)?.join(', ') ??
+                          '작가 정보 없음',
                     ),
+                    onTap: () => _showBookOptions(context, book),
+                  );
+                },
+              ),
     );
   }
 }
