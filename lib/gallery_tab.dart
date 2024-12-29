@@ -21,10 +21,6 @@ class _GalleryTabState extends State<GalleryTab>
   @override
   bool get wantKeepAlive => true;
 
-  TextEditingController _descriptionController = TextEditingController();
-
-  final ImagePicker _picker = ImagePicker();
-
   Widget _buildImage(
       {required List<Map<String, String>> images, required int index}) {
     return GestureDetector(
@@ -84,6 +80,7 @@ class _GalleryTabState extends State<GalleryTab>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final sizeX = MediaQuery.of(context).size.width;
     final sizeY = MediaQuery.of(context).size.height;
     final images = Provider.of<AppState>(context).images;
@@ -202,7 +199,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
               color: Colors.purple,
               onPressed: () {
                 Navigator.pop(context);
-                widget.onSave(widget.index, _descriptionController.text);
+                widget.onSave(widget.index - 1, _descriptionController.text);
               },
             ),
           ],

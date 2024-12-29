@@ -14,7 +14,7 @@ class AppState extends ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _descriptionController = TextEditingController();
 
-  // 리뷰 데이터 가져오기 (Immutable)
+  // 데이터 가져오기 (Immutable)
   List<Map<String, String>> get reviews => List.unmodifiable(_reviews);
   List<Map<String, String>> get images => List.unmodifiable(_images);
 
@@ -120,8 +120,8 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
       'images',
-      _images.map((item) {
-        return '${item['image']},${item['description']},${item['timestamp']}';
+      _images.map((image) {
+        return '${image['image']},${image['description']},${image['timestamp']}';
       }).toList(),
     );
   }
