@@ -65,6 +65,9 @@ class _SearchTabState extends State<SearchTab> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           backgroundColor: Colors.white,
           title: Row(children: <Widget>[
             Image.asset(
@@ -73,16 +76,14 @@ class _SearchTabState extends State<SearchTab> {
               height: 30,
             ),
             SizedBox(width: 10),
-            Text('기록하기'),]
-            ),
+            Text('기록하기'),
+          ]),
           content: const Text('이 도서를 어떻게 기록하시겠습니까?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('취소'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
             ),
             TextButton(
               onPressed: () {
@@ -106,9 +107,7 @@ class _SearchTabState extends State<SearchTab> {
                 );
               },
               child: const Text('사진으로 기록'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
             ),
             TextButton(
               onPressed: () {
@@ -130,9 +129,7 @@ class _SearchTabState extends State<SearchTab> {
                 );
               },
               child: const Text('텍스트로 기록'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
             ),
           ],
         );
