@@ -122,39 +122,61 @@ class _GalleryTabState extends State<GalleryTab>
               ),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ExpandableFab(
-        distance: 80,
-        type: ExpandableFabType.up,
-        openButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(Icons.add),
-          fabSize: ExpandableFabSize.regular,
-          foregroundColor: Colors.white,
-          backgroundColor: Color(0xFF33CCCC),
-          shape: CircleBorder(),
-        ),
-        closeButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(Icons.close),
-          fabSize: ExpandableFabSize.regular,
-          foregroundColor: Color(0xFF33CCCC),
-          backgroundColor: Colors.white,
-          shape: CircleBorder(),
-        ),
-        children: [
-          FloatingActionButton(
-            onPressed: () => Provider.of<AppState>(context, listen: false)
-                .pickImageFromGallery(context),
-            backgroundColor: Color(0xFF33CCCC),
-            child: const Icon(Icons.photo_library, color: Colors.white),
-            shape: CircleBorder(),
-          ),
-          FloatingActionButton(
-            onPressed: () => Provider.of<AppState>(context, listen: false)
-                .pickImageFromCamera(context),
-            backgroundColor: Color(0xFF33CCCC),
-            child: const Icon(Icons.camera_alt, color: Colors.white),
-            shape: CircleBorder(),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        shape: CircleBorder(),
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                height: 150,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: Image.asset(
+                            'assets/img/camera.png',
+                            width: 50,
+                            height: 50,
+                          ),
+                          iconSize: 50,
+                          onPressed: () {
+                            Provider.of<AppState>(context, listen: false)
+                                .pickImageFromCamera(context);
+                            Navigator.pop(context);
+                          },
+                        ),
+                        const Text('카메라'),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: Image.asset(
+                            'assets/img/gallery.png',
+                            width: 50,
+                            height: 50,
+                          ),
+                          iconSize: 50,
+                          onPressed: () {
+                            Provider.of<AppState>(context, listen: false)
+                                .pickImageFromGallery(context);
+                            Navigator.pop(context);
+                          },
+                        ),
+                        const Text('갤러리'),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        backgroundColor: Color(0xFF33CCCC),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -228,7 +250,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
               color: Colors.purple,
               onPressed: () {
                 Navigator.pop(context);
-                widget.onSave(widget.index - 1, _descriptionController.text);
+                widget.onSave(widget.index, _descriptionController.text);
               },
             ),
           ],
