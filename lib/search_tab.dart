@@ -241,9 +241,10 @@ class _SearchTabState extends State<SearchTab> {
                   children: context.watch<AppState>().recentSearches.map(
                     (query) {
                       return ListTile(
+                        leading: Icon(Icons.history, color: Colors.grey),
                         title: Text(query),
                         trailing: IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: const Icon(Icons.close, color: Colors.grey),
                           onPressed: () {
                             context.read<AppState>().removeRecentSearch(query);
                           },

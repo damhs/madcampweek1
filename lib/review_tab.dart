@@ -269,8 +269,11 @@ class ReviewDetailPage extends StatelessWidget {
               TextField(
                 controller: titleController,
                 decoration: const InputDecoration(
-                  labelText: '책 제목',
+                  labelText: '제목',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
+                ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -279,6 +282,9 @@ class ReviewDetailPage extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: '작가',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
+                ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -287,6 +293,9 @@ class ReviewDetailPage extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: '장르',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
+                ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -295,6 +304,9 @@ class ReviewDetailPage extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: '리뷰 내용',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
+                ),
                 ),
                 maxLines: 5,
               ),
