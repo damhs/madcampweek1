@@ -43,6 +43,7 @@ class _ReviewTabState extends State<ReviewTab>
               ]
             : [
                 PopupMenuButton<String>(
+                  color: Colors.white,
                   icon: const Icon(Icons.sort, color: Colors.purple),
                   onSelected: (criteria) {
                     setState(() {
@@ -232,6 +233,7 @@ class ReviewDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -291,6 +293,10 @@ class ReviewDetailPage extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: const Text('저장'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Color.fromARGB(255, 32, 186, 186),
+                  ),
                 ),
               ),
             ],
