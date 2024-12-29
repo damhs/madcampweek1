@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'review_tab.dart';
+import 'gallery_tab.dart';
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -23,7 +24,8 @@ class _SearchTabState extends State<SearchTab> {
       _isLoading = true;
     });
 
-    const apiKey = 'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키
+    const apiKey =
+        'AIzaSyDNWjiG_ysdjVdSvDRZpn2farxHYIqPkuk'; // Google Books API 키
     final url = Uri.parse(
         'https://www.googleapis.com/books/v1/volumes?q=$query&maxResults=40&key=$apiKey');
 
@@ -70,15 +72,29 @@ class _SearchTabState extends State<SearchTab> {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('취소'),
             ),
-            /*
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                DefaultTabController.of(context)?.animateTo(1); // 갤러리 탭으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GalleryDetailPage(
+                      index: context.read<AppState>().items.length,
+                      image: book['imageLinks']['thumbnail'],
+                      description: '',
+                      timestamp: DateTime.now().toString(),
+                      onDelete: (index) =>
+                          context.read<AppState>().deleteGalleryItem(index),
+                      onSave: (index, newDescription) => context
+                          .read<AppState>()
+                          .editGalleryItem(
+                              index, {'description': newDescription}),
+                    ),
+                  ),
+                );
               },
               child: const Text('사진으로 기록'),
             ),
-            */
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -162,8 +178,7 @@ class _SearchTabState extends State<SearchTab> {
                           : const Icon(Icons.book, size: 50),
                       title: Text(book['title'] ?? '제목 없음'),
                       subtitle: Text(
-                        (book['authors'] as List<dynamic>?)
-                                ?.join(', ') ??
+                        (book['authors'] as List<dynamic>?)?.join(', ') ??
                             '작가 정보 없음',
                       ),
                       onTap: () => _showBookOptions(context, book),

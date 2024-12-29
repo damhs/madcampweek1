@@ -8,9 +8,14 @@ class AppState extends ChangeNotifier {
   // 리뷰 데이터 가져오기 (Immutable)
   List<Map<String, String>> get reviews => List.unmodifiable(_reviews);
 
+  List<Map<String, String>> _items = [];
+
+  List<Map<String, String>> get items => List.unmodifiable(_items);
+
   // 생성자: SharedPreferences에서 초기 데이터를 불러옴
   AppState() {
     _loadReviews();
+    _loadGalleryItems();
   }
 
   // SharedPreferences에서 데이터 로드
@@ -86,6 +91,50 @@ class AppState extends ChangeNotifier {
       }
       return isAscending ? comparison : -comparison;
     });
+    notifyListeners();
+  }
+
+  Future<void> _loadGalleryItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final images = prefs.getStringList('images');
+    if (images != null) {
+      _items = images.map((image) {
+        final List<String> parts = image.split(',');
+        return {
+          'image': parts[0],
+          'description': parts[1],
+          'timestamp': parts[2],
+        };
+      }).toList();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveGalleryItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      'images',
+      _items.map((item) {
+        return '${item['image']},${item['description']},${item['timestamp']}';
+      }).toList(),
+    );
+  }
+
+  void addGalleryItem(Map<String, String> newItem) {
+    _items.add(newItem);
+    _saveGalleryItems();
+    notifyListeners();
+  }
+
+  void editGalleryItem(int index, Map<String, String> updatedItem) {
+    _items[index] = updatedItem;
+    _saveGalleryItems();
+    notifyListeners();
+  }
+
+  void deleteGalleryItem(int index) {
+    _items.removeAt(index);
+    _saveGalleryItems();
     notifyListeners();
   }
 }

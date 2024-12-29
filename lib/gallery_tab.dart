@@ -113,6 +113,8 @@ class _GalleryTabState extends State<GalleryTab>
           await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         _descriptionController.text = '';
+        _addImage(pickedFile.path, _descriptionController.text,
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -122,11 +124,11 @@ class _GalleryTabState extends State<GalleryTab>
               description: '',
               timestamp:
                   DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+              onDelete: _deleteImage,
+              onSave: _editImage,
             ),
           ),
         );
-        _addImage(pickedFile.path, _descriptionController.text,
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,6 +149,8 @@ class _GalleryTabState extends State<GalleryTab>
               image: items[index]['image']!,
               description: items[index]['description']!,
               timestamp: items[index]['timestamp']!,
+              onDelete: _deleteImage,
+              onSave: _editImage,
             ),
           ),
         );
@@ -189,70 +193,6 @@ class _GalleryTabState extends State<GalleryTab>
     );
   }
 
-  Widget GalleryDetailPage({
-    required int index,
-    required String image,
-    required String description,
-    required String timestamp,
-  }) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('독서 정보'),
-                Text(
-                  timestamp,
-                  style: const TextStyle(fontSize: 12.0),
-                ),
-              ],
-            ),
-            Spacer(),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              color: Colors.red,
-              onPressed: () {
-                Navigator.pop(context);
-                _deleteImage(index);
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.save),
-              color: Colors.purple,
-              onPressed: () {
-                _editImage(index, _descriptionController.text);
-              },
-            ),
-          ],
-        ),
-        backgroundColor: Colors.white,
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        child: Column(
-          children: [
-            Image.file(File(image)),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: TextField(
-                controller: _descriptionController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: '설명을 입력하세요.',
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final sizeX = MediaQuery.of(context).size.width;
@@ -285,6 +225,103 @@ class _GalleryTabState extends State<GalleryTab>
         onPressed: _pickImage,
         backgroundColor: Color(0xFF33CCCC),
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class GalleryDetailPage extends StatefulWidget {
+  final int index;
+  final String image;
+  final String description;
+  final String timestamp;
+  final Function(int index) onDelete;
+  final Function(int index, String description) onSave;
+
+  const GalleryDetailPage({
+    Key? key,
+    required this.index,
+    required this.image,
+    required this.description,
+    required this.timestamp,
+    required this.onDelete,
+    required this.onSave,
+  }) : super(key: key);
+
+  @override
+  _GalleryDetailPageState createState() => _GalleryDetailPageState();
+}
+
+class _GalleryDetailPageState extends State<GalleryDetailPage> {
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController = TextEditingController(text: widget.description);
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('독서 정보'),
+                Text(
+                  widget.timestamp,
+                  style: const TextStyle(fontSize: 12.0),
+                ),
+              ],
+            ),
+            Spacer(),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              color: Colors.red,
+              onPressed: () {
+                Navigator.pop(context);
+                widget.onDelete(widget.index);
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.save),
+              color: Colors.purple,
+              onPressed: () {
+                Navigator.pop(context);
+                widget.onSave(widget.index, _descriptionController.text);
+              },
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Image.file(File(widget.image)),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: TextField(
+                controller: _descriptionController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '설명을 입력하세요.',
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
