@@ -148,7 +148,41 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> pickImage(BuildContext context) async {
+  Future<void> pickImageFromCamera(BuildContext context) async {
+    bool havePermission = false;
+    final request = await Permission.camera.request();
+    havePermission = request.isGranted;
+    print("권한 요청");
+    if (havePermission) {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.camera);
+      if (pickedFile != null) {
+        _descriptionController.text = '';
+        addImage(pickedFile.path, _descriptionController.text,
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryDetailPage(
+              index: images.length,
+              image: pickedFile.path,
+              description: '',
+              timestamp:
+                  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+              onDelete: deleteImage,
+              onSave: editImage,
+            ),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('카메라 접근 권한이 필요합니다.')),
+      );
+    }
+  }
+
+  Future<void> pickImageFromGallery(BuildContext context) async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     print(androidInfo);
@@ -228,18 +262,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleSearchHistory() async{
+  Future<void> toggleSearchHistory() async {
     _isSearchHistoryEnabled = !_isSearchHistoryEnabled;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isSearchHistoryEnabled', _isSearchHistoryEnabled);
     notifyListeners();
   }
 
-  Future<void> removeRecentSearch(String query) async{
+  Future<void> removeRecentSearch(String query) async {
     _recentSearches.remove(query);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('recentSearches', _recentSearches);
     notifyListeners();
   }
-
 }

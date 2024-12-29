@@ -25,33 +25,37 @@ class _ReviewTabState extends State<ReviewTab>
 
     return Scaffold(
       appBar: AppBar(
-      backgroundColor: Colors.white,
-      title: Row(
-        children: [
-          Image.asset(
-            'assets/img/dokki_logo.png',
-            width: 30,
-            height: 30,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            isSelectionMode ? '리뷰 선택' : '나의 리뷰',
-            style: const TextStyle(color: Colors.black),
-          ),
-        ],
-      ),
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/img/dokki_logo.png',
+              width: 30,
+              height: 30,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              isSelectionMode ? '리뷰 선택' : '나의 리뷰',
+              style: const TextStyle(color: Colors.black),
+            ),
+          ],
+        ),
         actions: isSelectionMode
             ? [
                 TextButton(
                   onPressed: _toggleSelectionMode,
-                  child: const Text('취소', style: TextStyle(color: Colors.black)),
+                  child:
+                      const Text('취소', style: TextStyle(color: Colors.black)),
                 ),
                 TextButton(
                   onPressed: () {
-                    context.read<AppState>().deleteSelectedReviews(selectedIndexes);
+                    context
+                        .read<AppState>()
+                        .deleteSelectedReviews(selectedIndexes);
                     _toggleSelectionMode();
                   },
-                  child: const Text('삭제', style: TextStyle(color: Colors.black)),
+                  child:
+                      const Text('삭제', style: TextStyle(color: Colors.black)),
                 ),
               ]
             : [
@@ -66,7 +70,9 @@ class _ReviewTabState extends State<ReviewTab>
                         _sortCriteria = criteria;
                         _isAscending = true;
                       }
-                      context.read<AppState>().sortReviews(_sortCriteria, _isAscending);
+                      context
+                          .read<AppState>()
+                          .sortReviews(_sortCriteria, _isAscending);
                     });
                   },
                   itemBuilder: (BuildContext context) => [
@@ -97,7 +103,8 @@ class _ReviewTabState extends State<ReviewTab>
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.check_circle_outline, color: Colors.purple),
+                  icon: const Icon(Icons.check_circle_outline,
+                      color: Colors.purple),
                   onPressed: _toggleSelectionMode,
                 ),
               ],
@@ -109,7 +116,9 @@ class _ReviewTabState extends State<ReviewTab>
               itemBuilder: (context, index) =>
                   _buildReviewCard(reviews[index], index),
             ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
         onPressed: () {
           Navigator.push(
             context,
@@ -226,6 +235,7 @@ class _ReviewTabState extends State<ReviewTab>
   @override
   bool get wantKeepAlive => true;
 }
+
 class ReviewDetailPage extends StatelessWidget {
   final Map<String, String>? review;
   final void Function(Map<String, String>) onSubmit;
@@ -239,9 +249,11 @@ class ReviewDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final titleController = TextEditingController(text: review?['title'] ?? '');
-    final authorController = TextEditingController(text: review?['author'] ?? '');
+    final authorController =
+        TextEditingController(text: review?['author'] ?? '');
     final genreController = TextEditingController(text: review?['genre'] ?? '');
-    final contentController = TextEditingController(text: review?['content'] ?? '');
+    final contentController =
+        TextEditingController(text: review?['content'] ?? '');
 
     return Scaffold(
       appBar: AppBar(
@@ -292,7 +304,8 @@ class ReviewDetailPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     final now = DateTime.now();
-                    final formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now); // 포맷팅
+                    final formattedDate =
+                        DateFormat('yyyy-MM-dd HH:mm').format(now); // 포맷팅
 
                     final newReview = {
                       'title': titleController.text,

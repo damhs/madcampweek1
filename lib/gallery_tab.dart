@@ -2,10 +2,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_state.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 late SharedPreferences prefs;
 
@@ -121,11 +121,40 @@ class _GalleryTabState extends State<GalleryTab>
                 },
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Provider.of<AppState>(context, listen: false).pickImage(context),
-        backgroundColor: Color(0xFF33CCCC),
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: ExpandableFab(
+        distance: 80,
+        type: ExpandableFabType.up,
+        openButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(Icons.add),
+          fabSize: ExpandableFabSize.regular,
+          foregroundColor: Colors.white,
+          backgroundColor: Color(0xFF33CCCC),
+          shape: CircleBorder(),
+        ),
+        closeButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(Icons.close),
+          fabSize: ExpandableFabSize.regular,
+          foregroundColor: Color(0xFF33CCCC),
+          backgroundColor: Colors.white,
+          shape: CircleBorder(),
+        ),
+        children: [
+          FloatingActionButton(
+            onPressed: () => Provider.of<AppState>(context, listen: false)
+                .pickImageFromGallery(context),
+            backgroundColor: Color(0xFF33CCCC),
+            child: const Icon(Icons.photo_library, color: Colors.white),
+            shape: CircleBorder(),
+          ),
+          FloatingActionButton(
+            onPressed: () => Provider.of<AppState>(context, listen: false)
+                .pickImageFromCamera(context),
+            backgroundColor: Color(0xFF33CCCC),
+            child: const Icon(Icons.camera_alt, color: Colors.white),
+            shape: CircleBorder(),
+          ),
+        ],
       ),
     );
   }
