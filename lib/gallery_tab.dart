@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
+import 'app_state.dart';
 
 late SharedPreferences prefs;
 
@@ -25,117 +24,7 @@ class _GalleryTabState extends State<GalleryTab>
 
   List<Map<String, String>> items = [];
 
-  void initState() {
-    super.initState();
-    _loadImages();
-
-    _descriptionController = TextEditingController(text: '');
-  }
-
-  void dispose() {
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadImages() async {
-    prefs = await SharedPreferences.getInstance();
-    final List<String>? images = prefs.getStringList('images');
-    if (images != null) {
-      setState(() {
-        items = images.map((image) {
-          final List<String> parts = image.split(',');
-          return {
-            'image': parts[0],
-            'description': parts[1],
-            'timestamp': parts[2],
-          };
-        }).toList();
-      });
-    }
-  }
-
-  Future<void> _saveImages() async {
-    await prefs.setStringList(
-      'images',
-      items.map((item) {
-        return '${item['image']},${item['description']},${item['timestamp']}';
-      }).toList(),
-    );
-  }
-
-  void _addImage(String image, String description, String timestamp) {
-    setState(() {
-      items.add({
-        'image': image,
-        'description': description,
-        'timestamp': timestamp,
-      });
-    });
-    _saveImages();
-  }
-
-  void _editImage(int index, String description) {
-    setState(() {
-      items[index]['description'] = description;
-    });
-    _saveImages();
-  }
-
-  void _deleteImage(int index) {
-    setState(() {
-      items.removeAt(index);
-    });
-    _saveImages();
-  }
-
   final ImagePicker _picker = ImagePicker();
-
-  // 갤러리에서 이미지를 선택
-  Future<void> _pickImage() async {
-    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    print(androidInfo);
-    print(androidInfo.version.release);
-    final int androidVersion =
-        int.parse(androidInfo.version.release.split('.')[0]);
-    bool havePermission = false;
-
-    if (androidVersion >= 13) {
-      final request = await Permission.photos.request();
-      havePermission = request.isGranted;
-    } else {
-      final status = await Permission.storage.request();
-      havePermission = status.isGranted;
-    }
-    print("권한 요청");
-    if (havePermission) {
-      final XFile? pickedFile =
-          await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        _descriptionController.text = '';
-        _addImage(pickedFile.path, _descriptionController.text,
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GalleryDetailPage(
-              index: items.length,
-              image: pickedFile.path,
-              description: '',
-              timestamp:
-                  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-              onDelete: _deleteImage,
-              onSave: _editImage,
-            ),
-          ),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
-      );
-    }
-  }
 
   Widget _buildImage(
       {required List<Map<String, String>> items, required int index}) {
@@ -149,8 +38,9 @@ class _GalleryTabState extends State<GalleryTab>
               image: items[index]['image']!,
               description: items[index]['description']!,
               timestamp: items[index]['timestamp']!,
-              onDelete: _deleteImage,
-              onSave: _editImage,
+              onDelete:
+                  Provider.of<AppState>(context, listen: false).deleteImage,
+              onSave: Provider.of<AppState>(context, listen: false).editImage,
             ),
           ),
         );
@@ -222,7 +112,8 @@ class _GalleryTabState extends State<GalleryTab>
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _pickImage,
+        onPressed: () =>
+            Provider.of<AppState>(context, listen: false).pickImage(context),
         backgroundColor: Color(0xFF33CCCC),
         child: const Icon(Icons.add, color: Colors.white),
       ),

@@ -1,9 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:intl/intl.dart';
+import 'gallery_tab.dart'; // Add this line to import the GalleryDetailPage
 
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
+  final ImagePicker _picker = ImagePicker();
+  final TextEditingController _descriptionController = TextEditingController();
 
   // 리뷰 데이터 가져오기 (Immutable)
   List<Map<String, String>> get reviews => List.unmodifiable(_reviews);
@@ -15,7 +22,7 @@ class AppState extends ChangeNotifier {
   // 생성자: SharedPreferences에서 초기 데이터를 불러옴
   AppState() {
     _loadReviews();
-    _loadGalleryItems();
+    _loadImages();
   }
 
   // SharedPreferences에서 데이터 로드
@@ -94,7 +101,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _loadGalleryItems() async {
+  Future<void> _loadImages() async {
     final prefs = await SharedPreferences.getInstance();
     final images = prefs.getStringList('images');
     if (images != null) {
@@ -110,7 +117,7 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> _saveGalleryItems() async {
+  Future<void> _saveImages() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
       'images',
@@ -120,21 +127,71 @@ class AppState extends ChangeNotifier {
     );
   }
 
-  void addGalleryItem(Map<String, String> newItem) {
-    _items.add(newItem);
-    _saveGalleryItems();
+  void addImage(String image, String description, String timestamp) {
+    _items.add({
+      'image': image,
+      'description': description,
+      'timestamp': timestamp,
+    });
+    _saveImages();
     notifyListeners();
   }
 
-  void editGalleryItem(int index, Map<String, String> updatedItem) {
-    _items[index] = updatedItem;
-    _saveGalleryItems();
+  void editImage(int index, String description) {
+    _items[index]['description'] = description;
+    _saveImages();
     notifyListeners();
   }
 
-  void deleteGalleryItem(int index) {
+  void deleteImage(int index) {
     _items.removeAt(index);
-    _saveGalleryItems();
+    _saveImages();
     notifyListeners();
+  }
+
+  Future<void> pickImage(BuildContext context) async {
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    print(androidInfo);
+    print(androidInfo.version.release);
+    final int androidVersion =
+        int.parse(androidInfo.version.release.split('.')[0]);
+    bool havePermission = false;
+
+    if (androidVersion >= 13) {
+      final request = await Permission.photos.request();
+      havePermission = request.isGranted;
+    } else {
+      final status = await Permission.storage.request();
+      havePermission = status.isGranted;
+    }
+    print("권한 요청");
+    if (havePermission) {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        _descriptionController.text = '';
+        addImage(pickedFile.path, _descriptionController.text,
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryDetailPage(
+              index: items.length,
+              image: pickedFile.path,
+              description: '',
+              timestamp:
+                  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+              onDelete: deleteImage,
+              onSave: editImage,
+            ),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
+      );
+    }
   }
 }
