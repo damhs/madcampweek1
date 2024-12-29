@@ -23,18 +23,18 @@ class _SearchTabState extends State<SearchTab> {
   void initState() {
     super.initState();
     context.read<AppState>().loadRecentSearches();
-    
-    _focusNode.addListener((){
-      if(_focusNode.hasFocus){
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
         setState(() {
-        _showRecentSearches = true;
+          _showRecentSearches = true;
         });
       }
     });
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _focusNode.dispose();
     super.dispose();
   }
@@ -48,6 +48,7 @@ class _SearchTabState extends State<SearchTab> {
       context.read<AppState>().addRecentSearch(query);
     }
   }
+
   // Google Books API 호출
   Future<void> _searchBooks(String query) async {
     setState(() {
@@ -123,7 +124,7 @@ class _SearchTabState extends State<SearchTab> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => GalleryDetailPage(
-                      index: context.read<AppState>().items.length,
+                      index: context.read<AppState>().images.length,
                       image: book['imageLinks']['thumbnail'],
                       description: '',
                       timestamp: DateTime.now().toString(),
@@ -131,13 +132,12 @@ class _SearchTabState extends State<SearchTab> {
                           context.read<AppState>().deleteImage(index),
                       onSave: (index, newDescription) => context
                           .read<AppState>()
-                          .editImage(
-                              index, newDescription),
+                          .editImage(index, newDescription),
                     ),
                   ),
                 );
               },
-              child: const Text('사진으로 기록'),
+              child: const Text('사진'),
               style: TextButton.styleFrom(foregroundColor: Colors.black),
             ),
             TextButton(
@@ -159,7 +159,7 @@ class _SearchTabState extends State<SearchTab> {
                   ),
                 );
               },
-              child: const Text('텍스트로 기록'),
+              child: const Text('텍스트'),
               style: TextButton.styleFrom(foregroundColor: Colors.black),
             ),
           ],
@@ -209,8 +209,7 @@ class _SearchTabState extends State<SearchTab> {
       body: _showRecentSearches
           ? ListView(
               children: recentSearches
-                  .map(
-                    (query) => ListTile(
+                  .map((query) => ListTile(
                         title: Text(query),
                         onTap: () {
                           _searchController.text = query;
@@ -219,34 +218,33 @@ class _SearchTabState extends State<SearchTab> {
                       ))
                   .toList(),
             )
-          : 
-      _isLoading
-          ? const Center(child: CircularProgressIndicator()) // 로딩 중 표시
-          : _books.isEmpty
-              ? const Center(child: Text("검색 결과가 없습니다."))
-              : ListView.builder(
-                  itemCount: _books.length,
-                  itemBuilder: (context, index) {
-                    final Map<String, dynamic> book =
-                        _books[index]['volumeInfo'] ?? {};
-                    return ListTile(
-                      leading: book['imageLinks'] != null
-                          ? Image.network(
-                              book['imageLinks']['thumbnail'],
-                              fit: BoxFit.cover,
-                              width: 50,
-                              height: 50,
-                            )
-                          : const Icon(Icons.book, size: 50),
-                      title: Text(book['title'] ?? '제목 없음'),
-                      subtitle: Text(
-                        (book['authors'] as List<dynamic>?)?.join(', ') ??
-                            '작가 정보 없음',
-                      ),
-                      onTap: () => _showBookOptions(context, book),
-                    );
-                  },
-                ),
+          : _isLoading
+              ? const Center(child: CircularProgressIndicator()) // 로딩 중 표시
+              : _books.isEmpty
+                  ? const Center(child: Text("검색 결과가 없습니다."))
+                  : ListView.builder(
+                      itemCount: _books.length,
+                      itemBuilder: (context, index) {
+                        final Map<String, dynamic> book =
+                            _books[index]['volumeInfo'] ?? {};
+                        return ListTile(
+                          leading: book['imageLinks'] != null
+                              ? Image.network(
+                                  book['imageLinks']['thumbnail'],
+                                  fit: BoxFit.cover,
+                                  width: 50,
+                                  height: 50,
+                                )
+                              : const Icon(Icons.book, size: 50),
+                          title: Text(book['title'] ?? '제목 없음'),
+                          subtitle: Text(
+                            (book['authors'] as List<dynamic>?)?.join(', ') ??
+                                '작가 정보 없음',
+                          ),
+                          onTap: () => _showBookOptions(context, book),
+                        );
+                      },
+                    ),
     );
   }
 }

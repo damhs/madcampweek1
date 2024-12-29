@@ -1,3 +1,4 @@
+// gallery_tab.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -22,12 +23,10 @@ class _GalleryTabState extends State<GalleryTab>
 
   TextEditingController _descriptionController = TextEditingController();
 
-  List<Map<String, String>> items = [];
-
   final ImagePicker _picker = ImagePicker();
 
   Widget _buildImage(
-      {required List<Map<String, String>> items, required int index}) {
+      {required List<Map<String, String>> images, required int index}) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -35,9 +34,9 @@ class _GalleryTabState extends State<GalleryTab>
           MaterialPageRoute(
             builder: (context) => GalleryDetailPage(
               index: index,
-              image: items[index]['image']!,
-              description: items[index]['description']!,
-              timestamp: items[index]['timestamp']!,
+              image: images[index]['image']!,
+              description: images[index]['description']!,
+              timestamp: images[index]['timestamp']!,
               onDelete:
                   Provider.of<AppState>(context, listen: false).deleteImage,
               onSave: Provider.of<AppState>(context, listen: false).editImage,
@@ -50,7 +49,7 @@ class _GalleryTabState extends State<GalleryTab>
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: FileImage(File(items[index]['image']!)),
+                image: FileImage(File(images[index]['image']!)),
                 fit: BoxFit.cover,
               ),
             ),
@@ -70,7 +69,7 @@ class _GalleryTabState extends State<GalleryTab>
             child: Container(
               padding: const EdgeInsets.all(5.0),
               child: Text(
-                items[index]['timestamp']!,
+                images[index]['timestamp']!,
                 style: const TextStyle(
                   fontSize: 12.0,
                   color: Colors.white,
@@ -87,25 +86,26 @@ class _GalleryTabState extends State<GalleryTab>
   Widget build(BuildContext context) {
     final sizeX = MediaQuery.of(context).size.width;
     final sizeY = MediaQuery.of(context).size.height;
+    final images = Provider.of<AppState>(context).images;
     return Scaffold(
       appBar: AppBar(
         title: Row(
-        children: [
-          Image.asset(
-            'assets/img/dokki_logo.png',
-            width: 30,
-            height: 30,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            '나의 독서 앨범',
-            style: const TextStyle(color: Colors.black),
-          ),
-        ],
-      ),
+          children: [
+            Image.asset(
+              'assets/img/dokki_logo.png',
+              width: 30,
+              height: 30,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '나의 독서 앨범',
+              style: const TextStyle(color: Colors.black),
+            ),
+          ],
+        ),
         backgroundColor: Colors.white,
       ),
-      body: items.isEmpty
+      body: images.isEmpty
           ? const Center(child: Text('저장된 사진이 없습니다.'))
           : Container(
               width: sizeX,
@@ -117,10 +117,10 @@ class _GalleryTabState extends State<GalleryTab>
                   mainAxisSpacing: 5.0,
                   childAspectRatio: 1.0,
                 ),
-                itemCount: items.length,
+                itemCount: images.length,
                 padding: const EdgeInsets.all(5.0),
                 itemBuilder: (context, index) {
-                  return _buildImage(items: items, index: index);
+                  return _buildImage(images: images, index: index);
                 },
               ),
             ),

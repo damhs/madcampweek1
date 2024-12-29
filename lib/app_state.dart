@@ -1,3 +1,4 @@
+// app_state.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,15 +10,13 @@ import 'gallery_tab.dart'; // Add this line to import the GalleryDetailPage
 
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
+  List<Map<String, String>> _images = [];
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _descriptionController = TextEditingController();
 
   // 리뷰 데이터 가져오기 (Immutable)
   List<Map<String, String>> get reviews => List.unmodifiable(_reviews);
-
-  List<Map<String, String>> _items = [];
-
-  List<Map<String, String>> get items => List.unmodifiable(_items);
+  List<Map<String, String>> get images => List.unmodifiable(_images);
 
   // 생성자: SharedPreferences에서 초기 데이터를 불러옴
   AppState() {
@@ -105,7 +104,7 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final images = prefs.getStringList('images');
     if (images != null) {
-      _items = images.map((image) {
+      _images = images.map((image) {
         final List<String> parts = image.split(',');
         return {
           'image': parts[0],
@@ -121,14 +120,14 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
       'images',
-      _items.map((item) {
+      _images.map((item) {
         return '${item['image']},${item['description']},${item['timestamp']}';
       }).toList(),
     );
   }
 
   void addImage(String image, String description, String timestamp) {
-    _items.add({
+    _images.add({
       'image': image,
       'description': description,
       'timestamp': timestamp,
@@ -138,13 +137,13 @@ class AppState extends ChangeNotifier {
   }
 
   void editImage(int index, String description) {
-    _items[index]['description'] = description;
+    _images[index]['description'] = description;
     _saveImages();
     notifyListeners();
   }
 
   void deleteImage(int index) {
-    _items.removeAt(index);
+    _images.removeAt(index);
     _saveImages();
     notifyListeners();
   }
@@ -177,7 +176,7 @@ class AppState extends ChangeNotifier {
           context,
           MaterialPageRoute(
             builder: (context) => GalleryDetailPage(
-              index: items.length,
+              index: images.length,
               image: pickedFile.path,
               description: '',
               timestamp:
@@ -193,7 +192,8 @@ class AppState extends ChangeNotifier {
         const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
       );
     }
-}
+  }
+
   //최근 검색어
   List<String> _recentSearches = [];
 
@@ -206,18 +206,18 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> addRecentSearch(String query) async {
-    if(_recentSearches.contains(query)) {
+    if (_recentSearches.contains(query)) {
       _recentSearches.remove(query);
     }
     _recentSearches.insert(0, query);
-    if(_recentSearches.length > 10) {
+    if (_recentSearches.length > 10) {
       _recentSearches.removeRange(10, _recentSearches.length);
     }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('recentSearches', _recentSearches);
     notifyListeners();
   }
-  
+
   Future<void> clearRecentSearches() async {
     _recentSearches.clear();
     final prefs = await SharedPreferences.getInstance();
