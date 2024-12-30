@@ -92,7 +92,8 @@ flutter:
     - assets/img/img5.jpeg
     - assets/img/img6.jpeg
     - assets/fonts/
-    - assets/badges/
+    - assets/badges/photo_review_5.png
+    - assets/badges/text_review_5.png
   fonts:
     - family: Pretendard
       fonts:

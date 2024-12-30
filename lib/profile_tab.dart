@@ -265,7 +265,7 @@ class _ProfileTabState extends State<ProfileTab> {
             if (appState.badges['text_review_5']!)
               _buildBadgeTile('텍스트 리뷰 5개', 'assets/badges/text_review_5.png'),
             if (appState.badges['image_review_5']!)
-              _buildBadgeTile('이미지 리뷰 5개', 'assets/badges.photo_review_5.png'),
+              _buildBadgeTile('이미지 리뷰 5개', 'assets/badges/photo_review_5.png'),
           ],
         ),
       ],

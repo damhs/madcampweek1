@@ -144,6 +144,10 @@ class AppState extends ChangeNotifier {
   }
 
   void editImage(int index, String description) {
+    if(index < 0 || index >= _images.length) {
+      print('잘못된 인덱스: $index');
+      return;
+    }
     _images[index]['description'] = description;
     _saveImages();
     notifyListeners();
