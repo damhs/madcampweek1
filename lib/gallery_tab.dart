@@ -27,63 +27,6 @@ class _GalleryTabState extends State<GalleryTab>
   @override
   bool get wantKeepAlive => true;
 
-  Widget _buildImage(
-      {required List<Map<String, String>> images, required int index}) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GalleryDetailPage(
-              index: index,
-              image: images[index]['image']!,
-              description: images[index]['description']!,
-              timestamp: images[index]['timestamp']!,
-              onDelete:
-                  Provider.of<AppState>(context, listen: false).deleteImage,
-              onSave: Provider.of<AppState>(context, listen: false).editImage,
-            ),
-          ),
-        );
-      },
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: FileImage(File(images[index]['image']!)),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.white,
-                width: 1.5,
-              ),
-            ),
-            margin: const EdgeInsets.all(5.0),
-          ),
-          Positioned(
-            bottom: 5,
-            left: 5,
-            child: Container(
-              padding: const EdgeInsets.all(5.0),
-              child: Text(
-                images[index]['timestamp']!,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<String?> _showCreateFolderDialog(BuildContext context) {
     TextEditingController folderNameController = TextEditingController();
     return showDialog<String>(
@@ -152,9 +95,6 @@ class _GalleryTabState extends State<GalleryTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final sizeX = MediaQuery.of(context).size.width;
-    final sizeY = MediaQuery.of(context).size.height;
-    final images = Provider.of<AppState>(context).images;
     final folders = Provider.of<AppState>(context).folders;
 
     return Scaffold(
@@ -187,64 +127,63 @@ class _GalleryTabState extends State<GalleryTab>
         ),
         backgroundColor: Colors.white,
       ),
-      body: images.isEmpty
-          ? Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    color: Colors.teal[50],
-                    child: ListView.builder(
-                      itemCount: images.length,
-                      itemBuilder: (context, index) {
-                        return _buildFolder(folders: folders, index: index);
-                      },
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: Center(child: Text('이미지가 없습니다.')),
-                ),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    color: Colors.teal[100],
-                    child: ListView.builder(
-                      itemCount: images.length,
-                      itemBuilder: (context, index) {
-                        return _buildFolder(folders: folders, index: index);
-                      },
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: Container(
-                    width: sizeX,
-                    height: sizeY,
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 5.0,
-                        mainAxisSpacing: 5.0,
-                        childAspectRatio: 1.0,
-                      ),
-                      itemCount: images.length,
-                      padding: const EdgeInsets.all(5.0),
-                      itemBuilder: (context, index) {
-                        return _buildImage(images: images, index: index);
-                      },
-                    ),
-                  ),
-                ),
-              ],
+      body: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              color: Colors.teal[50],
+              child: ListView.builder(
+                itemCount: folders.length,
+                itemBuilder: (context, index) {
+                  return _buildFolder(folders: folders, index: index);
+                },
+              ),
             ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Center(child: Text('이미지가 없습니다.')),
+          ),
+        ],
+      ),
+      // : Row(
+      //     children: [
+      //       Expanded(
+      //         flex: 3,
+      //         child: Container(
+      //           color: Colors.teal[100],
+      //           child: ListView.builder(
+      //             itemCount: images.length,
+      //             itemBuilder: (context, index) {
+      //               return _buildFolder(folders: folders, index: index);
+      //             },
+      //           ),
+      //         ),
+      //       ),
+      //       Expanded(
+      //         flex: 7,
+      //         child: Container(
+      //           width: sizeX,
+      //           height: sizeY,
+      //           child: GridView.builder(
+      //             gridDelegate:
+      //                 const SliverGridDelegateWithFixedCrossAxisCount(
+      //               crossAxisCount: 2,
+      //               crossAxisSpacing: 5.0,
+      //               mainAxisSpacing: 5.0,
+      //               childAspectRatio: 1.0,
+      //             ),
+      //             itemCount: images.length,
+      //             padding: const EdgeInsets.all(5.0),
+      //             itemBuilder: (context, index) {
+      //               return _buildImage(images: images, index: index);
+      //             },
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         shape: CircleBorder(),
