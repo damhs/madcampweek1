@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_state.dart';
-import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 late SharedPreferences prefs;
 
@@ -78,6 +77,34 @@ class _GalleryTabState extends State<GalleryTab>
     );
   }
 
+  Widget _buildFolder() {
+    return ListView(
+      children: [
+        ListTile(
+          leading: Icon(Icons.folder, color: Colors.teal),
+          title: Text('폴더 1'),
+          onTap: () {
+            // 폴더 선택 로직
+          },
+        ),
+        // ListTile(
+        //   leading: Icon(Icons.folder, color: Colors.teal),
+        //   title: Text('폴더 2'),
+        //   onTap: () {
+        //     // 폴더 선택 로직
+        //   },
+        // ),
+        // ListTile(
+        //   leading: Icon(Icons.folder, color: Colors.teal),
+        //   title: Text('폴더 3'),
+        //   onTap: () {
+        //     // 폴더 선택 로직
+        //   },
+        // ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -103,37 +130,52 @@ class _GalleryTabState extends State<GalleryTab>
         backgroundColor: Colors.white,
       ),
       body: images.isEmpty
-          ? const Center(child: Text('저장된 사진이 없습니다.'))
+          ? Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    color: Colors.teal[50],
+                    child: ListView(
+                      children: [
+                        TextButton(
+                          style: ButtonStyle(
+                            maximumSize:
+                                MaterialStateProperty.all(Size(100, 120)),
+                          ),
+                          onPressed: () {},
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.folder,
+                                size: 80,
+                                color: Color(0xFF33CCCC),
+                              ),
+                              const Text(
+                                '전체',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Center(child: Text('이미지가 없습니다.')),
+                ),
+              ],
+            )
           : Row(
               children: [
                 Expanded(
-                  flex: 3, // 30% 영역
+                  flex: 3,
                   child: Container(
                     color: Colors.teal[100],
                     child: ListView(
-                      children: [
-                        ListTile(
-                          leading: Icon(Icons.folder, color: Colors.teal),
-                          title: Text('폴더 1'),
-                          onTap: () {
-                            // 폴더 선택 로직
-                          },
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.folder, color: Colors.teal),
-                          title: Text('폴더 2'),
-                          onTap: () {
-                            // 폴더 선택 로직
-                          },
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.folder, color: Colors.teal),
-                          title: Text('폴더 3'),
-                          onTap: () {
-                            // 폴더 선택 로직
-                          },
-                        ),
-                      ],
+                      children: [],
                     ),
                   ),
                 ),
@@ -165,6 +207,7 @@ class _GalleryTabState extends State<GalleryTab>
         shape: CircleBorder(),
         onPressed: () {
           showModalBottomSheet(
+            backgroundColor: Colors.white,
             context: context,
             builder: (BuildContext context) {
               return Container(
@@ -172,41 +215,51 @@ class _GalleryTabState extends State<GalleryTab>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Column(
-                      children: [
-                        IconButton(
-                          icon: Image.asset(
+                    TextButton(
+                      style: ButtonStyle(
+                        maximumSize: MaterialStateProperty.all(Size(100, 100)),
+                      ),
+                      onPressed: () {
+                        Provider.of<AppState>(context, listen: false)
+                            .pickImageFromCamera(context);
+                      },
+                      child: Column(
+                        children: [
+                          Image.asset(
                             'assets/img/camera.png',
                             width: 50,
                             height: 50,
                           ),
-                          iconSize: 50,
-                          onPressed: () {
-                            Provider.of<AppState>(context, listen: false)
-                                .pickImageFromCamera(context);
-                            Navigator.pop(context);
-                          },
-                        ),
-                        const Text('카메라'),
-                      ],
+                          const SizedBox(height: 10),
+                          const Text(
+                            '카메라',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
                     ),
-                    Column(
-                      children: [
-                        IconButton(
-                          icon: Image.asset(
+                    TextButton(
+                      style: ButtonStyle(
+                        maximumSize: MaterialStateProperty.all(Size(100, 100)),
+                      ),
+                      onPressed: () {
+                        Provider.of<AppState>(context, listen: false)
+                            .pickImageFromGallery(context);
+                      },
+                      child: Column(
+                        children: [
+                          Image.asset(
                             'assets/img/gallery.png',
                             width: 50,
                             height: 50,
                           ),
-                          iconSize: 50,
-                          onPressed: () {
-                            Provider.of<AppState>(context, listen: false)
-                                .pickImageFromGallery(context);
-                            Navigator.pop(context);
-                          },
-                        ),
-                        const Text('갤러리'),
-                      ],
+                          const SizedBox(height: 10),
+                          const Text(
+                            '갤러리',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
