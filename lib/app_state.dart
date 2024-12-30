@@ -12,17 +12,22 @@ import 'dart:io';
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
   List<Map<String, String>> _images = [];
+  List<Map<String, List<Map<String, String>>>> _folders = [];
+
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _descriptionController = TextEditingController();
 
   // 데이터 가져오기 (Immutable)
   List<Map<String, String>> get reviews => List.unmodifiable(_reviews);
   List<Map<String, String>> get images => List.unmodifiable(_images);
+  List<Map<String, List<Map<String, String>>>> get folders =>
+      List.unmodifiable(_folders);
 
   // 생성자: SharedPreferences에서 초기 데이터를 불러옴
   AppState() {
     _loadReviews();
     _loadImages();
+    _loadFolders();
     _loadProfile();
   }
 
@@ -144,7 +149,7 @@ class AppState extends ChangeNotifier {
   }
 
   void editImage(int index, String description) {
-    if(index < 0 || index >= _images.length) {
+    if (index < 0 || index >= _images.length) {
       print('잘못된 인덱스: $index');
       return;
     }
@@ -239,6 +244,52 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> _loadFolders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final folders = prefs.getStringList('folders');
+    if (folders != null) {
+      _folders = (folders.map((folder) =>
+              jsonDecode(folder) as Map<String, List<Map<String, String>>>))
+          .toList();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveFolders() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        'folders', _folders.map((folder) => jsonEncode(folder)).toList());
+  }
+
+  void addFolder(String folderName) {
+    _folders.add({folderName: []});
+    _saveFolders();
+    notifyListeners();
+  }
+
+  void editFolder(int index, String folderName) {
+    final folder = _folders[index];
+    _folders[index] = {folderName: folder.values.first};
+    _saveFolders();
+    notifyListeners();
+  }
+
+  void deleteFolder(int index) {
+    _folders.removeAt(index);
+    _saveFolders();
+    notifyListeners();
+  }
+
+  void addImageToFolder(int folderIndex, Map<String, String> image) {
+    final folder = _folders[folderIndex];
+    final folderName = folder.keys.first;
+    final images = folder.values.first;
+    images.add(image);
+    _folders[folderIndex] = {folderName: images};
+    _saveFolders();
+    notifyListeners();
+  }
+
   //최근 검색어
   List<String> _recentSearches = [];
   bool _isSearchHistoryEnabled = true;
@@ -251,6 +302,7 @@ class AppState extends ChangeNotifier {
     _isSearchHistoryEnabled = prefs.getBool('isSearchHistoryEnabled') ?? true;
     notifyListeners();
   }
+
   Future<void> saveRecentSearches() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('recentSearches', _recentSearches);
@@ -269,7 +321,7 @@ class AppState extends ChangeNotifier {
     }
     saveRecentSearches();
   }
-  
+
   void clearRecentSearches() {
     _recentSearches.clear();
     saveRecentSearches();
@@ -284,40 +336,41 @@ class AppState extends ChangeNotifier {
     _recentSearches.remove(query);
     saveRecentSearches();
   }
+
   //프로필
   File? _profileImage;
   String _nickname = '사용자';
-  
+
   File? get profileImage => _profileImage;
   String get nickname => _nickname;
-  
+
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    _nickname = prefs.getString('nickname')??'사용자';
+    _nickname = prefs.getString('nickname') ?? '사용자';
     final profileImagePath = prefs.getString('profileImagePath');
-    if(profileImagePath != null){
+    if (profileImagePath != null) {
       _profileImage = File(profileImagePath);
     }
-    _statusMessage = prefs.getString('statusMessage')??'상태 메시지를 설정하세요.';
-    _totalTextReviews = prefs.getInt('totalTextReviews')??0;
-    _totalImageReviews = prefs.getInt('totalImageReviews')??0;
-    _badges['text_review_5'] = prefs.getBool('text_review_5')??false;
-    _badges['image_review_5'] = prefs.getBool('image_review_5')??false;
+    _statusMessage = prefs.getString('statusMessage') ?? '상태 메시지를 설정하세요.';
+    _totalTextReviews = prefs.getInt('totalTextReviews') ?? 0;
+    _totalImageReviews = prefs.getInt('totalImageReviews') ?? 0;
+    _badges['text_review_5'] = prefs.getBool('text_review_5') ?? false;
+    _badges['image_review_5'] = prefs.getBool('image_review_5') ?? false;
     notifyListeners();
   }
 
   Future<void> saveProfile({File? image}) async {
     final prefs = await SharedPreferences.getInstance();
-    if(image!=null) {
+    if (image != null) {
       await prefs.setString('profileImagePath', image.path);
       _profileImage = image;
     }
-    await prefs.setString('nickname',_nickname);
-    await prefs.setString('statusMessage',_statusMessage);
+    await prefs.setString('nickname', _nickname);
+    await prefs.setString('statusMessage', _statusMessage);
     notifyListeners();
   }
 
-  void updateProfileImage(File image) async{
+  void updateProfileImage(File image) async {
     await saveProfile(image: image);
   }
 
@@ -345,6 +398,7 @@ class AppState extends ChangeNotifier {
       );
     return uniqueDays.length;
   }
+
   //뱃지
   int _totalTextReviews = 0;
   int _totalImageReviews = 0;
@@ -362,11 +416,12 @@ class AppState extends ChangeNotifier {
       print("텍스트 리뷰 5개 달성!");
       _unlockBadge('text_review_5');
     }
-    if(_totalImageReviews >= 5) {
+    if (_totalImageReviews >= 5) {
       print("이미지 리뷰 5개 달성!");
       _unlockBadge('image_review_5');
     }
   }
+
   final Map<String, bool> _badges = {
     'text_review_5': false,
     'image_review_5': false,
@@ -374,12 +429,11 @@ class AppState extends ChangeNotifier {
 
   Map<String, bool> get badges => Map.unmodifiable(_badges);
 
-  void _unlockBadge(String badgeId) async{
+  void _unlockBadge(String badgeId) async {
     _badges[badgeId] = true;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(badgeId, true);
     print('뱃지 해금: $badgeId');
     notifyListeners();
   }
-
 }

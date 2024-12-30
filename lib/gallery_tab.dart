@@ -9,7 +9,14 @@ import 'app_state.dart';
 late SharedPreferences prefs;
 
 class GalleryTab extends StatefulWidget {
-  const GalleryTab({Key? key}) : super(key: key);
+  final int index;
+  final List<Map<String, String>> images;
+
+  const GalleryTab({
+    Key? key,
+    required this.index,
+    required this.images,
+  }) : super(key: key);
 
   @override
   _GalleryTabState createState() => _GalleryTabState();
@@ -77,31 +84,68 @@ class _GalleryTabState extends State<GalleryTab>
     );
   }
 
-  Widget _buildFolder() {
-    return ListView(
-      children: [
-        ListTile(
-          leading: Icon(Icons.folder, color: Colors.teal),
-          title: Text('폴더 1'),
-          onTap: () {
-            // 폴더 선택 로직
-          },
-        ),
-        // ListTile(
-        //   leading: Icon(Icons.folder, color: Colors.teal),
-        //   title: Text('폴더 2'),
-        //   onTap: () {
-        //     // 폴더 선택 로직
-        //   },
-        // ),
-        // ListTile(
-        //   leading: Icon(Icons.folder, color: Colors.teal),
-        //   title: Text('폴더 3'),
-        //   onTap: () {
-        //     // 폴더 선택 로직
-        //   },
-        // ),
-      ],
+  Future<String?> _showCreateFolderDialog(BuildContext context) {
+    TextEditingController folderNameController = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('새 폴더 만들기'),
+          content: TextField(
+            controller: folderNameController,
+            decoration: InputDecoration(hintText: '폴더 이름을 입력하세요'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop(folderNameController.text);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFolder(
+      {required List<Map<String, List<Map<String, String>>>> folders,
+      required int index}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryTab(
+              index: index,
+              images: folders[index].values.first,
+            ),
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          Column(
+            children: [
+              Icon(
+                Icons.folder,
+                size: 80,
+                color: Color(0xFF33CCCC),
+              ),
+              Text(
+                folders[index].keys.first,
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -111,6 +155,8 @@ class _GalleryTabState extends State<GalleryTab>
     final sizeX = MediaQuery.of(context).size.width;
     final sizeY = MediaQuery.of(context).size.height;
     final images = Provider.of<AppState>(context).images;
+    final folders = Provider.of<AppState>(context).folders;
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -125,6 +171,18 @@ class _GalleryTabState extends State<GalleryTab>
               '나의 독서 앨범',
               style: const TextStyle(color: Colors.black),
             ),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.create_new_folder),
+              color: Colors.purple,
+              onPressed: () async {
+                String? folderName = await _showCreateFolderDialog(context);
+                if (folderName != null) {
+                  Provider.of<AppState>(context, listen: false)
+                      .addFolder(folderName);
+                }
+              },
+            ),
           ],
         ),
         backgroundColor: Colors.white,
@@ -136,29 +194,11 @@ class _GalleryTabState extends State<GalleryTab>
                   flex: 3,
                   child: Container(
                     color: Colors.teal[50],
-                    child: ListView(
-                      children: [
-                        TextButton(
-                          style: ButtonStyle(
-                            maximumSize:
-                                MaterialStateProperty.all(Size(100, 120)),
-                          ),
-                          onPressed: () {},
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.folder,
-                                size: 80,
-                                color: Color(0xFF33CCCC),
-                              ),
-                              const Text(
-                                '전체',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    child: ListView.builder(
+                      itemCount: images.length,
+                      itemBuilder: (context, index) {
+                        return _buildFolder(folders: folders, index: index);
+                      },
                     ),
                   ),
                 ),
@@ -174,8 +214,11 @@ class _GalleryTabState extends State<GalleryTab>
                   flex: 3,
                   child: Container(
                     color: Colors.teal[100],
-                    child: ListView(
-                      children: [],
+                    child: ListView.builder(
+                      itemCount: images.length,
+                      itemBuilder: (context, index) {
+                        return _buildFolder(folders: folders, index: index);
+                      },
                     ),
                   ),
                 ),
@@ -269,6 +312,87 @@ class _GalleryTabState extends State<GalleryTab>
         },
         backgroundColor: Color(0xFF33CCCC),
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class ImageTab extends StatefulWidget {
+  const ImageTab({Key? key}) : super(key: key);
+
+  @override
+  _ImageTabState createState() => _ImageTabState();
+}
+
+class _ImageTabState extends State<ImageTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  Widget _buildImage(
+      {required List<Map<String, String>> images, required int index}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryDetailPage(
+              index: index,
+              image: images[index]['image']!,
+              description: images[index]['description']!,
+              timestamp: images[index]['timestamp']!,
+              onDelete:
+                  Provider.of<AppState>(context, listen: false).deleteImage,
+              onSave: Provider.of<AppState>(context, listen: false).editImage,
+            ),
+          ),
+        );
+      },
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: FileImage(File(images[index]['image']!)),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.white,
+                width: 1.5,
+              ),
+            ),
+            margin: const EdgeInsets.all(5.0),
+          ),
+          Positioned(
+            bottom: 5,
+            left: 5,
+            child: Container(
+              padding: const EdgeInsets.all(5.0),
+              child: Text(
+                images[index]['timestamp']!,
+                style: const TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: 7,
+      child: Container(
+        color: Colors.teal[100],
+        child: const Center(child: Text('이미지 탭')),
       ),
     );
   }

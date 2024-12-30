@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'app_state.dart'; // 새로 만든 AppState 클래스 임포트
+import 'app_state.dart';
 import 'search_tab.dart';
 import 'gallery_tab.dart';
 import 'review_tab.dart';
@@ -54,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _tabContents = [
       const SearchTab(),
-      const GalleryTab(),
+      const GalleryTab(index: 0, images: []),
       const ReviewTab(),
       const ProfileTab(),
     ];
@@ -65,7 +65,6 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _tabContents[_currentIndex],
       bottomNavigationBar: SizedBox(
-        
         height: 100,
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
