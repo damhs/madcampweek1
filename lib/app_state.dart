@@ -242,8 +242,14 @@ class AppState extends ChangeNotifier {
     _isSearchHistoryEnabled = prefs.getBool('isSearchHistoryEnabled') ?? true;
     notifyListeners();
   }
+  Future<void> saveRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('recentSearches', _recentSearches);
+    await prefs.setBool('isSearchHistoryEnabled', _isSearchHistoryEnabled);
+    notifyListeners();
+  }
 
-  Future<void> addRecentSearch(String query) async {
+  void addRecentSearch(String query) {
     if (!_isSearchHistoryEnabled) return;
     if (_recentSearches.contains(query)) {
       _recentSearches.remove(query);
@@ -252,52 +258,66 @@ class AppState extends ChangeNotifier {
     if (_recentSearches.length > 10) {
       _recentSearches.removeRange(10, _recentSearches.length);
     }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('recentSearches', _recentSearches);
-    notifyListeners();
+    saveRecentSearches();
   }
-
-  Future<void> clearRecentSearches() async {
+  
+  void clearRecentSearches() {
     _recentSearches.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('recentSearches', _recentSearches);
-    notifyListeners();
+    saveRecentSearches();
   }
 
-  Future<void> toggleSearchHistory() async {
+  void toggleSearchHistory() {
     _isSearchHistoryEnabled = !_isSearchHistoryEnabled;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isSearchHistoryEnabled', _isSearchHistoryEnabled);
-    notifyListeners();
+    saveRecentSearches();
   }
 
-  Future<void> removeRecentSearch(String query) async {
+  void removeRecentSearch(String query) {
     _recentSearches.remove(query);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('recentSearches', _recentSearches);
-    notifyListeners();
+    saveRecentSearches();
   }
-
+  //프로필
   File? _profileImage;
   String _nickname = '사용자';
   
   File? get profileImage => _profileImage;
   String get nickname => _nickname;
 
-  void updateProfileImage(File image) {
-    _profileImage = image;
-    notifyListeners();
-  }
-
-  Future<void> updateNickname(String nickname) async {
-    _nickname = nickname;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nickname', _nickname);
-    notifyListeners();
-  }
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     _nickname = prefs.getString('nickname')??'사용자';
+    final profileImagePath = prefs.getString('profileImagePath');
+    if(profileImagePath != null){
+      _profileImage = File(profileImagePath);
+    }
+    _statusMessage = prefs.getString('statusMessage')??'상태 메시지를 설정하세요.';
     notifyListeners();
+  }
+
+  Future<void> saveProfile({File? image}) async {
+    final prefs = await SharedPreferences.getInstance();
+    if(image!=null) {
+      await prefs.setString('profileImagePath', image.path);
+      _profileImage = image;
+    }
+    await prefs.setString('nickname',_nickname);
+    await prefs.setString('statusMessage',_statusMessage);
+    notifyListeners();
+  }
+
+  void updateProfileImage(File image) async{
+    await saveProfile(image: image);
+  }
+
+  void updateNickname(String nickname) async {
+    _nickname = nickname;
+    await saveProfile();
+  }
+
+  String _statusMessage = '상태 메시지를 설정하세요.';
+  String get statusMessage => _statusMessage;
+
+  void updateStatusMessage(String message) {
+    _statusMessage = message;
+    saveProfile();
   }
 }
