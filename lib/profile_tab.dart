@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class ProfileTab extends StatefulWidget {
-  const ProfileTab({Key? key}) : super(key: key);
+  const ProfileTab({super.key});
 
   @override
   State<ProfileTab> createState() => _ProfileTabState();
@@ -28,96 +28,143 @@ class _ProfileTabState extends State<ProfileTab> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () {
-                _showImageSourceSelector(context, appState);
-              },
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: appState.profileImage != null
-                    ? FileImage(appState.profileImage!)
-                    : null,
-                child: appState.profileImage == null
-                    ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                Text(
-                  appState.nickname,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                // 프로필 카드
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showImageSourceSelector(context, appState);
+                          },
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: appState.profileImage != null
+                                ? FileImage(appState.profileImage!)
+                                : null,
+                            child: appState.profileImage == null
+                                ? const Icon(Icons.person,
+                                    size: 50, color: Colors.grey)
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      appState.nickname,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit,
+                                        color: Colors.grey),
+                                    onPressed: () {
+                                      _showEditNicknameDialog(
+                                          context, appState);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      appState.statusMessage,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit,
+                                        color: Colors.grey),
+                                    onPressed: () {
+                                      _showEditStatusMessageDialog(
+                                          context, appState);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.grey),
-                  onPressed: () {
-                    _showEditNicknameDialog(context, appState);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Text(
-                    appState.statusMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                const SizedBox(height: 20),
+
+                // 통계 카드
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatisticTile(
+                          icon: Icons.photo_library,
+                          label: '업로드한 사진',
+                          value: appState.imageCount.toString(),
+                        ),
+                        _buildStatisticTile(
+                          icon: Icons.edit,
+                          label: '작성한 리뷰',
+                          value: appState.reviewCount.toString(),
+                        ),
+                        _buildStatisticTile(
+                          icon: Icons.calendar_today,
+                          label: '활동한 날',
+                          value: appState.uploadDayCount.toString(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.grey),
-                  onPressed: () {
-                    _showEditStatusMessageDialog(context, appState);
-                  },
+                const SizedBox(height: 20),
+
+                // 뱃지 섹션
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _buildBadgeSection(appState),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildStatisticTile(
-                  icon: Icons.photo_library,
-                  label: '업로드한 사진',
-                  value: appState.imageCount.toString(),
-                ),
-                const SizedBox(width: 30),
-                _buildStatisticTile(
-                  icon: Icons.edit,
-                  label: '작성한 리뷰',
-                  value: appState.reviewCount.toString(),
-                ),
-                const SizedBox(width: 30),
-                
-                _buildStatisticTile(
-                  icon: Icons.calendar_today,
-                  label: '활동한 날',
-                  value: appState.uploadDayCount.toString(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-            _buildBadgeSection(appState),
-          ],
-          
+          ),
         ),
       ),
-        )
-      )
-
     );
   }
 
@@ -171,7 +218,8 @@ class _ProfileTabState extends State<ProfileTab> {
               leading: const Icon(Icons.camera_alt),
               title: const Text('카메라'),
               onTap: () async {
-                final image = await _picker.pickImage(source: ImageSource.camera);
+                final image =
+                    await _picker.pickImage(source: ImageSource.camera);
                 if (image != null) {
                   appState.updateProfileImage(File(image.path));
                 }
@@ -234,6 +282,7 @@ class _ProfileTabState extends State<ProfileTab> {
       },
     );
   }
+
   Widget _buildStatisticTile({
     required IconData icon,
     required String label,
@@ -255,7 +304,23 @@ class _ProfileTabState extends State<ProfileTab> {
       ],
     );
   }
+
   Widget _buildBadgeSection(AppState appState) {
+    final badges = [
+      if (appState.badges['text_review_5']!)
+        _buildBadgeTile('텍스트 리뷰\n5개', 'assets/badges/text_review_5.png'),
+      if (appState.badges['image_review_5']!)
+        _buildBadgeTile('이미지 리뷰\n5개', 'assets/badges/photo_review_5.png'),
+      if (appState.badges['text_review_10']!)
+        _buildBadgeTile('텍스트 리뷰\n10개', 'assets/badges/text_review_10.png'),
+      if (appState.badges['image_review_10']!)
+        _buildBadgeTile('이미지 리뷰\n10개', 'assets/badges/photo_review_10.png'),
+      if (appState.badges['text_review_50']!)
+        _buildBadgeTile('텍스트 리뷰\n50개', 'assets/badges/text_review_50.png'),
+      if (appState.badges['image_review_50']!)
+        _buildBadgeTile('이미지 리뷰\n50개', 'assets/badges/photo_review_50.png'),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -264,41 +329,52 @@ class _ProfileTabState extends State<ProfileTab> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            if (appState.badges['text_review_5']!)
-              _buildBadgeTile('텍스트 리뷰\n5개', 'assets/badges/text_review_5.png'),
-            if (appState.badges['image_review_5']!)
-              _buildBadgeTile('이미지 리뷰\n5개', 'assets/badges/photo_review_5.png'),
-            if (appState.badges['text_review_10']!)
-              _buildBadgeTile('텍스트 리뷰\n10개', 'assets/badges/text_review_10.png'),
-            if (appState.badges['image_review_10']!)
-              _buildBadgeTile('이미지 리뷰\n10개', 'assets/badges/photo_review_10.png'),
-            if (appState.badges['text_review_50']!)
-              _buildBadgeTile('텍스트 리뷰\n50개', 'assets/badges/text_review_50.png'),
-            if (appState.badges['image_review_50']!)
-              _buildBadgeTile('이미지 리뷰\n50개', 'assets/badges/photo_review_50.png'),
-          ],
+        // 스크롤 가능하도록 감싸기
+        SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5, // 최대 높이 제한
+            ),
+            child: GridView.builder(
+              shrinkWrap: true,
+              //physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.0,
+                mainAxisExtent: 100,
+              ),
+              itemCount: badges.length,
+              itemBuilder: (context, index) => badges[index],
+            ),
+          ),
         ),
       ],
     );
   }
+
   Widget _buildBadgeTile(String title, String iconPath) {
-    return Row(
-      children:[
-      Column(
-      children: [
-        Image.asset(
-          iconPath,
-          width: 50,
-          height: 50,
-        ),
-        const SizedBox(height: 4),
-        Text(title, style: const TextStyle(fontSize: 14), textAlign: TextAlign.center,),
-      ],
-    ),
-    const SizedBox(width: 12),
-    ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double iconSize = constraints.maxWidth * 0.6; // 셀 너비의 60% 사용
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              iconPath,
+              width: iconSize,
+              height: iconSize,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        );
+      },
     );
   }
 }
