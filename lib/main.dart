@@ -33,9 +33,10 @@ class MyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(
-        secondary: Colors.deepPurple, // Secondary 색상 정의
-        onSurface: Colors.black,
+        colorScheme:
+            ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(
+          secondary: Colors.deepPurple, // Secondary 색상 정의
+          onSurface: Colors.black,
         ),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Pretendard',
@@ -68,7 +69,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _tabContents = [
       const SearchTab(),
-      const GalleryTab(index: 0, images: []),
+      const GalleryTab(images: []),
       const ReviewTab(),
       const ProfileTab(),
     ];

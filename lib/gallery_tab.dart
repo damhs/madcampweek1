@@ -9,12 +9,10 @@ import 'app_state.dart';
 late SharedPreferences prefs;
 
 class GalleryTab extends StatefulWidget {
-  final int index;
   final List<Map<String, String>> images;
 
   const GalleryTab({
     Key? key,
-    required this.index,
     required this.images,
   }) : super(key: key);
 
@@ -24,6 +22,8 @@ class GalleryTab extends StatefulWidget {
 
 class _GalleryTabState extends State<GalleryTab>
     with AutomaticKeepAliveClientMixin {
+  int? _currentFolderIndex;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -62,15 +62,10 @@ class _GalleryTabState extends State<GalleryTab>
       required int index}) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GalleryTab(
-              index: index,
-              images: folders[index].values.first,
-            ),
-          ),
-        );
+        setState(() {
+          _currentFolderIndex = index;
+        });
+        Navigator.pop(context);
       },
       child: Column(
         children: [
@@ -92,21 +87,118 @@ class _GalleryTabState extends State<GalleryTab>
     );
   }
 
+  Widget _buildImage(
+      {required List<Map<String, String>> images, required int index}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GalleryDetailPage(
+              index: index,
+              image: images[index]['image']!,
+              description: images[index]['description']!,
+              timestamp: images[index]['timestamp']!,
+              onDelete:
+                  Provider.of<AppState>(context, listen: false).deleteImage,
+              onSave: Provider.of<AppState>(context, listen: false).editImage,
+            ),
+          ),
+        );
+      },
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: FileImage(File(images[index]['image']!)),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.white,
+                width: 1.5,
+              ),
+            ),
+            margin: const EdgeInsets.all(5.0),
+          ),
+          Positioned(
+            bottom: 5,
+            left: 5,
+            child: Container(
+              padding: const EdgeInsets.all(5.0),
+              child: Text(
+                images[index]['timestamp']!,
+                style: const TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final folders = Provider.of<AppState>(context).folders;
+    final currentImages = _currentFolderIndex == null
+        ? folders[0].values.first
+        : folders[_currentFolderIndex!].values.first;
+    final sizeX = MediaQuery.of(context).size.width;
+    final sizeY = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
+        leading: _currentFolderIndex == null
+            ? Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    color: Color(0xFF33CCCC),
+                    icon: const Icon(
+                      Icons.menu,
+                    ),
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                    tooltip:
+                        MaterialLocalizations.of(context).openAppDrawerTooltip,
+                  );
+                },
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(
+                    () {
+                      _currentFolderIndex = null;
+                    },
+                  );
+                },
+              ),
         title: Row(
           children: [
-            Image.asset(
-              'assets/img/dokki_logo.png',
-              width: 30,
-              height: 30,
-            ),
-            const SizedBox(width: 10),
+            // IconButton(
+            //   icon: Image.asset(
+            //     'assets/img/dokki_logo.png',
+            //     width: 30,
+            //     height: 30,
+            //   ),
+            //   onPressed: () {
+            //     setState(
+            //       () {
+            //         _currentFolderIndex = null;
+            //       },
+            //     );
+            //   },
+            // ),
+            // const SizedBox(width: 10),
             Text(
               '나의 독서 앨범',
               style: const TextStyle(color: Colors.black),
@@ -127,63 +219,38 @@ class _GalleryTabState extends State<GalleryTab>
         ),
         backgroundColor: Colors.white,
       ),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              color: Colors.teal[50],
-              child: ListView.builder(
-                itemCount: folders.length,
+      drawer: Drawer(
+        width: sizeX * 0.4,
+        shape: Border(
+          right: BorderSide(color: Colors.teal, width: 0),
+        ),
+        backgroundColor: Colors.teal[50],
+        child: ListView.builder(
+          itemCount: folders.length,
+          itemBuilder: (context, index) {
+            return _buildFolder(folders: folders, index: index);
+          },
+        ),
+      ),
+      body: currentImages.isEmpty
+          ? const Center(child: Text('이미지가 없습니다.'))
+          : Container(
+              width: sizeX,
+              height: sizeY,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: currentImages.length,
+                padding: const EdgeInsets.all(5.0),
                 itemBuilder: (context, index) {
-                  return _buildFolder(folders: folders, index: index);
+                  return _buildImage(images: currentImages, index: index);
                 },
               ),
             ),
-          ),
-          Expanded(
-            flex: 7,
-            child: Center(child: Text('이미지가 없습니다.')),
-          ),
-        ],
-      ),
-      // : Row(
-      //     children: [
-      //       Expanded(
-      //         flex: 3,
-      //         child: Container(
-      //           color: Colors.teal[100],
-      //           child: ListView.builder(
-      //             itemCount: images.length,
-      //             itemBuilder: (context, index) {
-      //               return _buildFolder(folders: folders, index: index);
-      //             },
-      //           ),
-      //         ),
-      //       ),
-      //       Expanded(
-      //         flex: 7,
-      //         child: Container(
-      //           width: sizeX,
-      //           height: sizeY,
-      //           child: GridView.builder(
-      //             gridDelegate:
-      //                 const SliverGridDelegateWithFixedCrossAxisCount(
-      //               crossAxisCount: 2,
-      //               crossAxisSpacing: 5.0,
-      //               mainAxisSpacing: 5.0,
-      //               childAspectRatio: 1.0,
-      //             ),
-      //             itemCount: images.length,
-      //             padding: const EdgeInsets.all(5.0),
-      //             itemBuilder: (context, index) {
-      //               return _buildImage(images: images, index: index);
-      //             },
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         shape: CircleBorder(),
@@ -251,87 +318,6 @@ class _GalleryTabState extends State<GalleryTab>
         },
         backgroundColor: Color(0xFF33CCCC),
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-}
-
-class ImageTab extends StatefulWidget {
-  const ImageTab({Key? key}) : super(key: key);
-
-  @override
-  _ImageTabState createState() => _ImageTabState();
-}
-
-class _ImageTabState extends State<ImageTab>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
-  Widget _buildImage(
-      {required List<Map<String, String>> images, required int index}) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GalleryDetailPage(
-              index: index,
-              image: images[index]['image']!,
-              description: images[index]['description']!,
-              timestamp: images[index]['timestamp']!,
-              onDelete:
-                  Provider.of<AppState>(context, listen: false).deleteImage,
-              onSave: Provider.of<AppState>(context, listen: false).editImage,
-            ),
-          ),
-        );
-      },
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: FileImage(File(images[index]['image']!)),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.white,
-                width: 1.5,
-              ),
-            ),
-            margin: const EdgeInsets.all(5.0),
-          ),
-          Positioned(
-            bottom: 5,
-            left: 5,
-            child: Container(
-              padding: const EdgeInsets.all(5.0),
-              child: Text(
-                images[index]['timestamp']!,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: 7,
-      child: Container(
-        color: Colors.teal[100],
-        child: const Center(child: Text('이미지 탭')),
       ),
     );
   }

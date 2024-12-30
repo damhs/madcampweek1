@@ -12,7 +12,9 @@ import 'dart:io';
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
   List<Map<String, String>> _images = [];
-  List<Map<String, List<Map<String, String>>>> _folders = [];
+  List<Map<String, List<Map<String, String>>>> _folders = [
+    {'전체': []}
+  ];
 
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _descriptionController = TextEditingController();
@@ -356,10 +358,10 @@ class AppState extends ChangeNotifier {
     _totalImageReviews = prefs.getInt('totalImageReviews') ?? 0;
     _badges['text_review_5'] = prefs.getBool('text_review_5') ?? false;
     _badges['image_review_5'] = prefs.getBool('image_review_5') ?? false;
-    _badges['text_review_10'] = prefs.getBool('text_review_10')??false;
-    _badges['image_review_10'] = prefs.getBool('image_review_10')??false;
-    _badges['text_review_50'] = prefs.getBool('text_review_50')??false;
-    _badges['image_review_50'] = prefs.getBool('image_review_50')??false;
+    _badges['text_review_10'] = prefs.getBool('text_review_10') ?? false;
+    _badges['image_review_10'] = prefs.getBool('image_review_10') ?? false;
+    _badges['text_review_50'] = prefs.getBool('text_review_50') ?? false;
+    _badges['image_review_50'] = prefs.getBool('image_review_50') ?? false;
     notifyListeners();
   }
 
@@ -420,11 +422,11 @@ class AppState extends ChangeNotifier {
       print("텍스트 리뷰 5개 달성!");
       _unlockBadge('text_review_5');
     }
-    if(_totalTextReviews >= 10) {
+    if (_totalTextReviews >= 10) {
       print("텍스트 리뷰 10개 달성!");
       _unlockBadge('text_review_10');
     }
-    if(_totalTextReviews >= 50) {
+    if (_totalTextReviews >= 50) {
       print("텍스트 리뷰 50개 달성!");
       _unlockBadge('text_review_50');
     }
@@ -432,11 +434,11 @@ class AppState extends ChangeNotifier {
       print("이미지 리뷰 5개 달성!");
       _unlockBadge('image_review_5');
     }
-    if(_totalImageReviews >= 10) {
+    if (_totalImageReviews >= 10) {
       print("이미지 리뷰 10개 달성!");
       _unlockBadge('image_review_10');
     }
-    if(_totalImageReviews >= 50) {
+    if (_totalImageReviews >= 50) {
       print("이미지 리뷰 50개 달성!");
       _unlockBadge('image_review_50');
     }
@@ -454,7 +456,7 @@ class AppState extends ChangeNotifier {
   Map<String, bool> get badges => Map.unmodifiable(_badges);
 
   void _unlockBadge(String badgeId) async {
-    if(_badges[badgeId]==false) _badges[badgeId] = true;
+    if (_badges[badgeId] == false) _badges[badgeId] = true;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(badgeId, true);
     print('뱃지 해금: $badgeId');
