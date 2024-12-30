@@ -84,7 +84,34 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildStatisticTile(
+                  icon: Icons.photo_library,
+                  label: '업로드한 사진',
+                  value: appState.imageCount.toString(),
+                ),
+                const SizedBox(width: 30),
+                _buildStatisticTile(
+                  icon: Icons.edit,
+                  label: '작성한 리뷰',
+                  value: appState.reviewCount.toString(),
+                ),
+                const SizedBox(width: 30),
+                
+                _buildStatisticTile(
+                  icon: Icons.calendar_today,
+                  label: '활동한 날',
+                  value: appState.uploadDayCount.toString(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            _buildBadgeSection(appState),
           ],
+          
         ),
       ),
     );
@@ -201,6 +228,60 @@ class _ProfileTabState extends State<ProfileTab> {
           ],
         );
       },
+    );
+  }
+  Widget _buildStatisticTile({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 32, color: Colors.teal),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+  Widget _buildBadgeSection(AppState appState) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '획득한 뱃지',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            if (appState.badges['text_review_5']!)
+              _buildBadgeTile('텍스트 리뷰 5개', 'assets/img/dokki_logo.png'),
+            if (appState.badges['image_review_5']!)
+              _buildBadgeTile('이미지 리뷰 5개', 'assets/img/dokki_logo.png'),
+          ],
+        ),
+      ],
+    );
+  }
+  Widget _buildBadgeTile(String title, String iconPath) {
+    return Column(
+      children: [
+        Image.asset(
+          iconPath,
+          width: 50,
+          height: 50,
+        ),
+        const SizedBox(height: 4),
+        Text(title, style: const TextStyle(fontSize: 14)),
+      ],
     );
   }
 }

@@ -47,9 +47,11 @@ class AppState extends ChangeNotifier {
   // 새로운 리뷰 추가
   void addReview(Map<String, String> newReview) {
     _reviews.add(newReview);
-    print('Added Review: $_reviews');
+    _totalTextReviews++;
     _saveReviews();
+    _saveReviewCounts();
     notifyListeners();
+    _checkBadgeUnlock();
   }
 
   // 기존 리뷰 수정
@@ -134,8 +136,11 @@ class AppState extends ChangeNotifier {
       'description': description,
       'timestamp': timestamp,
     });
+    _totalImageReviews++;
     _saveImages();
+    _saveReviewCounts();
     notifyListeners();
+    _checkBadgeUnlock();
   }
 
   void editImage(int index, String description) {
@@ -290,6 +295,8 @@ class AppState extends ChangeNotifier {
       _profileImage = File(profileImagePath);
     }
     _statusMessage = prefs.getString('statusMessage')??'상태 메시지를 설정하세요.';
+    _totalTextReviews = prefs.getInt('totalTextReviews')??0;
+    _totalImageReviews = prefs.getInt('totalImageReviews')??0;
     notifyListeners();
   }
 
@@ -320,4 +327,53 @@ class AppState extends ChangeNotifier {
     _statusMessage = message;
     saveProfile();
   }
+
+  int get reviewCount => _reviews.length;
+  int get imageCount => _images.length;
+  int get uploadDayCount {
+    final Set<String> uniqueDays = _reviews
+        .map((review) => review['date']!.split(' ')[0]) // 리뷰 날짜 (yyyy-MM-dd)
+        .toSet()
+      ..addAll(
+        _images.map((image) => image['timestamp']!.split(' ')[0]), // 이미지 업로드 날짜
+      );
+    return uniqueDays.length;
+  }
+  //뱃지
+  int _totalTextReviews = 0;
+  int _totalImageReviews = 0;
+  int get totalTextReviews => _totalTextReviews;
+  int get totalImageReviews => _totalImageReviews;
+
+  Future<void> _saveReviewCounts() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('totalTextReviews', _totalTextReviews);
+    await prefs.setInt('totalImageReviews', _totalImageReviews);
+  }
+
+  void _checkBadgeUnlock() {
+    if (_totalTextReviews >= 5) {
+      print("텍스트 리뷰 5개 달성!");
+      _unlockBadge('text_review_5');
+    }
+    if(_totalImageReviews >= 5) {
+      print("이미지 리뷰 5개 달성!");
+      _unlockBadge('image_review_5');
+    }
+  }
+  final Map<String, bool> _badges = {
+    'text_review_5': false,
+    'image_review_5': false,
+  };
+
+  Map<String, bool> get badges => Map.unmodifiable(_badges);
+
+  void _unlockBadge(String badgeId) async{
+    _badges[badgeId] = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(badgeId, true);
+    print('뱃지 해금: $badgeId');
+    notifyListeners();
+  }
+
 }
