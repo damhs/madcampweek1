@@ -23,6 +23,20 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black, width: 1.0),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.teal, width: 2.0),
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(
+        secondary: Colors.deepPurple, // Secondary 색상 정의
+        onSurface: Colors.black,
+        ),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Pretendard',
         textTheme: const TextTheme(

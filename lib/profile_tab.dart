@@ -284,7 +284,9 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
   Widget _buildBadgeTile(String title, String iconPath) {
-    return Column(
+    return Row(
+      children:[
+      Column(
       children: [
         Image.asset(
           iconPath,
@@ -294,6 +296,9 @@ class _ProfileTabState extends State<ProfileTab> {
         const SizedBox(height: 4),
         Text(title, style: const TextStyle(fontSize: 14), textAlign: TextAlign.center,),
       ],
+    ),
+    const SizedBox(width: 12),
+    ],
     );
   }
 }
