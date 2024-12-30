@@ -17,7 +17,6 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -26,7 +25,9 @@ class _ProfileTabState extends State<ProfileTab> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -114,6 +115,9 @@ class _ProfileTabState extends State<ProfileTab> {
           
         ),
       ),
+        )
+      )
+
     );
   }
 
@@ -263,17 +267,17 @@ class _ProfileTabState extends State<ProfileTab> {
         Row(
           children: [
             if (appState.badges['text_review_5']!)
-              _buildBadgeTile('텍스트 리뷰 5개', 'assets/badges/text_review_5.png'),
+              _buildBadgeTile('텍스트 리뷰\n5개', 'assets/badges/text_review_5.png'),
             if (appState.badges['image_review_5']!)
-              _buildBadgeTile('이미지 리뷰 5개', 'assets/badges/photo_review_5.png'),
+              _buildBadgeTile('이미지 리뷰\n5개', 'assets/badges/photo_review_5.png'),
             if (appState.badges['text_review_10']!)
-              _buildBadgeTile('텍스트 리뷰 10개', 'assets/badges/text_review_10.png'),
+              _buildBadgeTile('텍스트 리뷰\n10개', 'assets/badges/text_review_10.png'),
             if (appState.badges['image_review_10']!)
-              _buildBadgeTile('이미지 리뷰 10개', 'assets/badges/photo_review_10.png'),
+              _buildBadgeTile('이미지 리뷰\n10개', 'assets/badges/photo_review_10.png'),
             if (appState.badges['text_review_50']!)
-              _buildBadgeTile('텍스트 리뷰 50개', 'assets/badges/text_review_50.png'),
+              _buildBadgeTile('텍스트 리뷰\n50개', 'assets/badges/text_review_50.png'),
             if (appState.badges['image_review_50']!)
-              _buildBadgeTile('이미지 리뷰 50개', 'assets/badges/photo_review_50.png'),
+              _buildBadgeTile('이미지 리뷰\n50개', 'assets/badges/photo_review_50.png'),
           ],
         ),
       ],
@@ -288,7 +292,7 @@ class _ProfileTabState extends State<ProfileTab> {
           height: 50,
         ),
         const SizedBox(height: 4),
-        Text(title, style: const TextStyle(fontSize: 14)),
+        Text(title, style: const TextStyle(fontSize: 14), textAlign: TextAlign.center,),
       ],
     );
   }
