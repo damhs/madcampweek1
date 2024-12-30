@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
 import 'gallery_tab.dart'; // Add this line to import the GalleryDetailPage
+import 'dart:io';
 
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
@@ -22,6 +23,7 @@ class AppState extends ChangeNotifier {
   AppState() {
     _loadReviews();
     _loadImages();
+    _loadProfile();
   }
 
   // SharedPreferences에서 데이터 로드
@@ -273,6 +275,29 @@ class AppState extends ChangeNotifier {
     _recentSearches.remove(query);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('recentSearches', _recentSearches);
+    notifyListeners();
+  }
+
+  File? _profileImage;
+  String _nickname = '사용자';
+  
+  File? get profileImage => _profileImage;
+  String get nickname => _nickname;
+
+  void updateProfileImage(File image) {
+    _profileImage = image;
+    notifyListeners();
+  }
+
+  Future<void> updateNickname(String nickname) async {
+    _nickname = nickname;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nickname', _nickname);
+    notifyListeners();
+  }
+  Future<void> _loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    _nickname = prefs.getString('nickname')??'사용자';
     notifyListeners();
   }
 }

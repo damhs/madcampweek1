@@ -4,6 +4,7 @@ import 'app_state.dart'; // 새로 만든 AppState 클래스 임포트
 import 'search_tab.dart';
 import 'gallery_tab.dart';
 import 'review_tab.dart';
+import 'profile_tab.dart';
 
 void main() {
   runApp(
@@ -55,6 +56,7 @@ class _MainScreenState extends State<MainScreen> {
       const SearchTab(),
       const GalleryTab(),
       const ReviewTab(),
+      const ProfileTab(),
     ];
   }
 
@@ -63,8 +65,10 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _tabContents[_currentIndex],
       bottomNavigationBar: SizedBox(
+        
         height: 100,
         child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           currentIndex: _currentIndex,
           onTap: (int index) {
@@ -86,6 +90,10 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.edit),
               label: '리뷰',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: '프로필',
             ),
           ],
         ),
