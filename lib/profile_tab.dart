@@ -25,6 +25,7 @@ class _ProfileTabState extends State<ProfileTab> {
         ),
         backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.teal[50],
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

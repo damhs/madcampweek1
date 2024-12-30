@@ -4,7 +4,7 @@ import 'app_state.dart';
 import 'package:intl/intl.dart';
 
 class ReviewTab extends StatefulWidget {
-  const ReviewTab({Key? key}) : super(key: key);
+  const ReviewTab({super.key});
 
   @override
   State<ReviewTab> createState() => _ReviewTabState();
@@ -109,6 +109,7 @@ class _ReviewTabState extends State<ReviewTab>
                 ),
               ],
       ),
+      backgroundColor: Colors.teal[50],
       body: reviews.isEmpty
           ? const Center(child: Text('저장된 리뷰가 없습니다.'))
           : ListView.builder(
@@ -241,10 +242,10 @@ class ReviewDetailPage extends StatelessWidget {
   final void Function(Map<String, String>) onSubmit;
 
   const ReviewDetailPage({
-    Key? key,
+    super.key,
     this.review,
     required this.onSubmit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -273,7 +274,7 @@ class ReviewDetailPage extends StatelessWidget {
                   border: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -284,7 +285,7 @@ class ReviewDetailPage extends StatelessWidget {
                   border: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -295,7 +296,7 @@ class ReviewDetailPage extends StatelessWidget {
                   border: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -306,7 +307,7 @@ class ReviewDetailPage extends StatelessWidget {
                   border: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                ),
+                  ),
                 ),
                 maxLines: 5,
               ),
@@ -330,11 +331,11 @@ class ReviewDetailPage extends StatelessWidget {
                     onSubmit(newReview);
                     Navigator.pop(context);
                   },
-                  child: const Text('저장'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Color.fromARGB(255, 32, 186, 186),
                   ),
+                  child: const Text('저장'),
                 ),
               ),
             ],
