@@ -258,90 +258,83 @@ class ReviewDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
-        backgroundColor: Colors.white,
+        title: Text(review == null ? '리뷰 추가' : '리뷰 수정',
+            style: TextStyle(fontFamily: "Pretendard")),
+        backgroundColor: Colors.teal[50],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: '제목',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: authorController,
-                decoration: const InputDecoration(
-                  labelText: '작가',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: genreController,
-                decoration: const InputDecoration(
-                  labelText: '장르',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: contentController,
-                decoration: const InputDecoration(
-                  labelText: '리뷰 내용',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF33CCCC), width: 2),
-                  ),
-                ),
-                maxLines: 5,
-              ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
+        child: Column(
+          children: [
+            _buildLinedTextField(controller: titleController, label: '제목'),
+            _buildLinedTextField(controller: authorController, label: '작가'),
+            _buildLinedTextField(controller: genreController, label: '장르'),
+            _buildLinedTextField(
+              controller: contentController,
+              label: '리뷰 내용',
+              maxLines: 10,
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
                   onPressed: () {
                     final now = DateTime.now();
                     final formattedDate =
-                        DateFormat('yyyy-MM-dd HH:mm').format(now); // 포맷팅
+                        DateFormat('yyyy-MM-dd HH:mm').format(now);
 
                     final newReview = {
                       'title': titleController.text,
                       'author': authorController.text,
                       'genre': genreController.text,
                       'content': contentController.text,
-                      'date': formattedDate, // 포맷된 날짜 저장
+                      'date': formattedDate,
                     };
-                    print('New Review: $newReview');
                     onSubmit(newReview);
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Color.fromARGB(255, 32, 186, 186),
+                    backgroundColor: Colors.teal[300],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
                   ),
                   child: const Text('저장'),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLinedTextField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: null, // InputDecoration 제거
+          style: const TextStyle(fontSize: 16),
+          cursorColor: Colors.black, // 커서 색상
+        ),
+        const Divider(
+          color: Colors.black, // 가로선 색상
+          thickness: 1, // 가로선 두께
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }
