@@ -92,6 +92,7 @@ flutter:
     - assets/img/img5.jpeg
     - assets/img/img6.jpeg
     - assets/fonts/
+    - assets/badges/
   fonts:
     - family: Pretendard
       fonts:

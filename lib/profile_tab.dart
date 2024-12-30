@@ -259,13 +259,13 @@ class _ProfileTabState extends State<ProfileTab> {
           '획득한 뱃지',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Row(
           children: [
             if (appState.badges['text_review_5']!)
-              _buildBadgeTile('텍스트 리뷰 5개', 'assets/img/dokki_logo.png'),
+              _buildBadgeTile('텍스트 리뷰 5개', 'assets/badges/text_review_5.png'),
             if (appState.badges['image_review_5']!)
-              _buildBadgeTile('이미지 리뷰 5개', 'assets/img/dokki_logo.png'),
+              _buildBadgeTile('이미지 리뷰 5개', 'assets/badges.photo_review_5.png'),
           ],
         ),
       ],

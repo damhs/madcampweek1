@@ -286,7 +286,7 @@ class AppState extends ChangeNotifier {
   
   File? get profileImage => _profileImage;
   String get nickname => _nickname;
-
+  
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     _nickname = prefs.getString('nickname')??'사용자';
@@ -297,6 +297,8 @@ class AppState extends ChangeNotifier {
     _statusMessage = prefs.getString('statusMessage')??'상태 메시지를 설정하세요.';
     _totalTextReviews = prefs.getInt('totalTextReviews')??0;
     _totalImageReviews = prefs.getInt('totalImageReviews')??0;
+    _badges['text_review_5'] = prefs.getBool('text_review_5')??false;
+    _badges['image_review_5'] = prefs.getBool('image_review_5')??false;
     notifyListeners();
   }
 
