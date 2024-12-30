@@ -104,22 +104,61 @@ class _GalleryTabState extends State<GalleryTab>
       ),
       body: images.isEmpty
           ? const Center(child: Text('저장된 사진이 없습니다.'))
-          : Container(
-              width: sizeX,
-              height: sizeY,
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 5.0,
-                  mainAxisSpacing: 5.0,
-                  childAspectRatio: 1.0,
+          : Row(
+              children: [
+                Expanded(
+                  flex: 3, // 30% 영역
+                  child: Container(
+                    color: Colors.teal[100],
+                    child: ListView(
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.folder, color: Colors.teal),
+                          title: Text('폴더 1'),
+                          onTap: () {
+                            // 폴더 선택 로직
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.folder, color: Colors.teal),
+                          title: Text('폴더 2'),
+                          onTap: () {
+                            // 폴더 선택 로직
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.folder, color: Colors.teal),
+                          title: Text('폴더 3'),
+                          onTap: () {
+                            // 폴더 선택 로직
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                itemCount: images.length,
-                padding: const EdgeInsets.all(5.0),
-                itemBuilder: (context, index) {
-                  return _buildImage(images: images, index: index);
-                },
-              ),
+                Expanded(
+                  flex: 7,
+                  child: Container(
+                    width: sizeX,
+                    height: sizeY,
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 5.0,
+                        mainAxisSpacing: 5.0,
+                        childAspectRatio: 1.0,
+                      ),
+                      itemCount: images.length,
+                      padding: const EdgeInsets.all(5.0),
+                      itemBuilder: (context, index) {
+                        return _buildImage(images: images, index: index);
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
