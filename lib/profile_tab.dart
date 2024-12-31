@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:table_calendar/table_calendar.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -117,7 +118,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
+                weeklyReviewCalendar(context),
+                const SizedBox(height: 20),
                 // 통계 카드
                 Card(
                   shape: RoundedRectangleBorder(
@@ -376,6 +378,109 @@ class _ProfileTabState extends State<ProfileTab> {
           ],
         );
       },
+    );
+  }
+
+  Widget weeklyReviewCalendar(BuildContext context) {
+    final weeklyReviewDates = context.watch<AppState>().getWeeklyReviewDates();
+    print("주간 리뷰 날짜(원본): $weeklyReviewDates");
+    final highlightedDays =
+        weeklyReviewDates.map((date) => DateTime.parse(date)).toSet();
+    print("하이라이트 날짜: $highlightedDays");
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Text(
+              '이번 주 리뷰 달성 현황',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            TableCalendar(
+              /*
+              calendarStyle: CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  border: Border.all(color: Colors.red, width: 2), // 오늘 날짜 테두리
+                  shape: BoxShape.rectangle,
+                ),
+                //markerDecoration: BoxDecoration(), // 마커 제거
+                markersAutoAligned: false, // 자동 정렬 비활성화
+                markersAlignment: Alignment.bottomCenter, // 정렬 확인
+              ),*/
+              focusedDay: DateTime.now(),
+              firstDay: DateTime.now().subtract(Duration(days: 365)),
+              lastDay: DateTime.now().add(Duration(days: 365)),
+              calendarFormat: CalendarFormat.week,
+              headerStyle: HeaderStyle(
+                formatButtonVisible: false, // formatButton 제거
+                titleCentered: true,
+              ),
+              /*
+              calendarBuilders: CalendarBuilders(
+                defaultBuilder: (context, day, focusedDay) {
+                  final normalizedDay =
+                      DateTime.utc(day.year, day.month, day.day);
+                  final isToday = normalizedDay ==
+                      DateTime.utc(
+                        DateTime.now().year,
+                        DateTime.now().month,
+                        DateTime.now().day,
+                      );
+
+                  if (isToday) {
+                    // 오늘 날짜
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.red, width: 2),
+                        shape: BoxShape.rectangle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(color: Colors.black), // 검은색 글씨
+                      ),
+                    );
+                  }
+                  return null; // 기본 스타일
+                },
+                markerBuilder: (context, day, events) {
+                  // 날짜 아래 점 표시
+                  final normalizedDay =
+                      DateTime.utc(day.year, day.month, day.day);
+                  final isHighlighted = highlightedDays.contains(normalizedDay);
+
+                  if (isHighlighted) {
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: 5.0,
+                        height: 5.0,
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple, // 점 색상
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    );
+                  }
+                  return null;
+                },
+              ),*/
+              selectedDayPredicate: (day) {
+                // 선택된 날짜를 판단하기 위한 함수
+                final normalizedDay =
+                    DateTime.utc(day.year, day.month, day.day);
+                return highlightedDays.contains(normalizedDay);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

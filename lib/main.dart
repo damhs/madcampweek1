@@ -9,14 +9,34 @@ import 'profile_tab.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (_) => AppState(),
+      create: (context) {
+        final appState = AppState();
+        /*
+        // 테스트 데이터 추가
+        appState.addReview({
+          'title': '테스트 리뷰 1',
+          'author': '작가 1',
+          'genre': '장르 1',
+          'content': '내용 1',
+          'date': '2024-12-29 10:30',
+        });
+        appState.addReview({
+          'title': '테스트 리뷰 2',
+          'author': '작가 2',
+          'genre': '장르 2',
+          'content': '내용 2',
+          'date': '2024-12-30 15:00',
+        });*/
+
+        return appState;
+      },
       child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +73,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -69,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _tabContents = [
       const SearchTab(),
-      const GalleryTab(images: []),
+      const GalleryTab(),
       const ReviewTab(),
       const ProfileTab(),
     ];

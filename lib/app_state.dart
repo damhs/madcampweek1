@@ -28,6 +28,7 @@ class AppState extends ChangeNotifier {
     _loadFolders();
     _loadImageItems();
     _loadProfile();
+    _loadReviewDates();
   }
 
   // SharedPreferences에서 데이터 로드
@@ -54,6 +55,13 @@ class AppState extends ChangeNotifier {
     _totalTextReviews++;
     _saveReviews();
     _saveReviewCounts();
+    final date = newReview['date']!.split(' ')[0];
+    if (!_reviewDates.contains(date)) {
+      _reviewDates.add(date);
+      print("새로운 날짜 추가: $date");
+      print("리뷰 날짜: $_reviewDates");
+      _saveReviewDates();
+    }
     notifyListeners();
     _checkBadgeUnlock();
   }
@@ -130,11 +138,11 @@ class AppState extends ChangeNotifier {
 
   void editFolder(int index, String folderName) {
     _folders[index] = folderName;
-    _imageItems.forEach((imageItem) {
+    for (var imageItem in _imageItems) {
       if (imageItem['folder'] == _folders[index]) {
         imageItem['folder'] = folderName;
       }
-    });
+    }
     _saveFolders();
     notifyListeners();
   }
@@ -447,6 +455,43 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(badgeId, true);
     print('뱃지 해금: $badgeId');
+    notifyListeners();
+  }
+
+  //주간 캘린더
+  List<String> getWeeklyReviewDates() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(Duration(days: 6));
+
+    print("현재 날짜: $now");
+    print("이번 주 시작: $startOfWeek");
+    print("이번 주 끝: $endOfWeek");
+
+    final result = _reviewDates.where((date) {
+      final reviewDate = DateTime.parse(date).toUtc(); // UTC로 변환
+      final isInRange = reviewDate.isAtSameMomentAs(startOfWeek.toUtc()) ||
+          reviewDate.isAtSameMomentAs(endOfWeek.toUtc()) ||
+          (reviewDate.isAfter(startOfWeek.toUtc()) &&
+              reviewDate.isBefore(endOfWeek.toUtc()));
+      print("검사 중인 날짜: $reviewDate, 범위 내: $isInRange");
+      return isInRange;
+    }).toList();
+
+    print("이번 주 리뷰 날짜: $result");
+    return result;
+  }
+
+  List<String> _reviewDates = [];
+  List<String> get reviewDates => List.unmodifiable(_reviewDates);
+  Future<void> _saveReviewDates() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('reviewDates', _reviewDates);
+  }
+
+  Future<void> _loadReviewDates() async {
+    final prefs = await SharedPreferences.getInstance();
+    _reviewDates = prefs.getStringList('reviewDates') ?? [];
     notifyListeners();
   }
 }
