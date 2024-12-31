@@ -309,20 +309,20 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   Widget _buildBadgeSection(AppState appState) {
-    final badges = [
-      if (appState.badges['text_review_5']!)
-        _buildBadgeTile('텍스트 리뷰\n5개', 'assets/badges/text_review_5.png'),
-      if (appState.badges['image_review_5']!)
-        _buildBadgeTile('이미지 리뷰\n5개', 'assets/badges/photo_review_5.png'),
-      if (appState.badges['text_review_10']!)
-        _buildBadgeTile('텍스트 리뷰\n10개', 'assets/badges/text_review_10.png'),
-      if (appState.badges['image_review_10']!)
-        _buildBadgeTile('이미지 리뷰\n10개', 'assets/badges/photo_review_10.png'),
-      if (appState.badges['text_review_50']!)
-        _buildBadgeTile('텍스트 리뷰\n50개', 'assets/badges/text_review_50.png'),
-      if (appState.badges['image_review_50']!)
-        _buildBadgeTile('이미지 리뷰\n50개', 'assets/badges/photo_review_50.png'),
-    ];
+    final badges = appState.badges.entries.map((entry) {
+      final badgeId = entry.key;
+      final isUnlocked = entry.value;
+
+      return _buildBadgeTile(
+        title: isUnlocked
+            ? appState.badgeNames[badgeId] ?? '알 수 없는 뱃지' // 잠금 해제 시 실제 이름
+            : '???', // 잠금 상태일 때
+        iconPath: isUnlocked
+            ? 'assets/badges/$badgeId.png' // 보유한 뱃지 이미지
+            : 'assets/badges/locked.png', // 잠긴 뱃지 이미지
+        isUnlocked: isUnlocked,
+      );
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,35 +332,32 @@ class _ProfileTabState extends State<ProfileTab> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        // 스크롤 가능하도록 감싸기
-        SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.5, // 최대 높이 제한
-            ),
-            child: GridView.builder(
-              shrinkWrap: true,
-              //physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.0,
-                mainAxisExtent: 100,
-              ),
-              itemCount: badges.length,
-              itemBuilder: (context, index) => badges[index],
-            ),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.0,
           ),
+          itemCount: badges.length,
+          itemBuilder: (context, index) => badges[index],
         ),
       ],
     );
   }
 
-  Widget _buildBadgeTile(String title, String iconPath) {
+  Widget _buildBadgeTile({
+    required String title,
+    required String iconPath,
+    required bool isUnlocked,
+  }) {
     return LayoutBuilder(
       builder: (context, constraints) {
         double iconSize = constraints.maxWidth * 0.6; // 셀 너비의 60% 사용
+        double textSize = constraints.maxWidth * 0.15; // 텍스트 크기 동적 조정
+
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -368,12 +365,19 @@ class _ProfileTabState extends State<ProfileTab> {
               iconPath,
               width: iconSize,
               height: iconSize,
+              /*color: isUnlocked ? null : Colors.grey,
+              colorBlendMode:
+                  isUnlocked ? null : BlendMode.saturation, // 잠긴 상태 블렌딩*/
             ),
             const SizedBox(height: 4),
             Text(
               title,
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(
+                fontSize: textSize,
+                color: isUnlocked ? Colors.black : Colors.grey,
+              ),
               textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         );

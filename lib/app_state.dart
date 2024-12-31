@@ -357,6 +357,12 @@ class AppState extends ChangeNotifier {
     _badges['image_review_10'] = prefs.getBool('image_review_10') ?? false;
     _badges['text_review_50'] = prefs.getBool('text_review_50') ?? false;
     _badges['image_review_50'] = prefs.getBool('image_review_50') ?? false;
+    _badges['text_review_100'] = prefs.getBool('text_review_100') ?? false;
+    _badges['image_review_100'] = prefs.getBool('image_review_100') ?? false;
+    _badges['total_review_100'] = prefs.getBool('total_review_100') ?? false;
+    _badges['review_day_7'] = prefs.getBool('review_day_7') ?? false;
+    _badges['review_day_30'] = prefs.getBool('review_day_30') ?? false;
+    _badges['first_review'] = prefs.getBool('first_review') ?? false;
     notifyListeners();
   }
 
@@ -414,39 +420,50 @@ class AppState extends ChangeNotifier {
   }
 
   void _checkBadgeUnlock() {
-    if (_totalTextReviews >= 5) {
-      print("텍스트 리뷰 5개 달성!");
-      _unlockBadge('text_review_5');
-    }
-    if (_totalTextReviews >= 10) {
-      print("텍스트 리뷰 10개 달성!");
-      _unlockBadge('text_review_10');
-    }
-    if (_totalTextReviews >= 50) {
-      print("텍스트 리뷰 50개 달성!");
-      _unlockBadge('text_review_50');
-    }
-    if (_totalImageReviews >= 5) {
-      print("이미지 리뷰 5개 달성!");
-      _unlockBadge('image_review_5');
-    }
-    if (_totalImageReviews >= 10) {
-      print("이미지 리뷰 10개 달성!");
-      _unlockBadge('image_review_10');
-    }
-    if (_totalImageReviews >= 50) {
-      print("이미지 리뷰 50개 달성!");
-      _unlockBadge('image_review_50');
-    }
+    if (_totalTextReviews >= 5) _unlockBadge('text_review_5');
+    if (_totalImageReviews >= 5) _unlockBadge('image_review_5');
+    if (_totalTextReviews >= 10) _unlockBadge('text_review_10');
+    if (_totalImageReviews >= 10) _unlockBadge('image_review_10');
+    if (_totalTextReviews >= 50) _unlockBadge('text_review_50');
+    if (_totalImageReviews >= 50) _unlockBadge('image_review_50');
+    if (_totalTextReviews >= 100) _unlockBadge('text_review_100');
+    if (_totalImageReviews >= 100) _unlockBadge('image_review_100');
+    if (_totalTextReviews + _totalImageReviews >= 100)
+      _unlockBadge('total_review_100');
+    if (uploadDayCount >= 7) _unlockBadge('review_day_7');
+    if (uploadDayCount >= 30) _unlockBadge('review_day_30');
+    if (_totalTextReviews + _totalImageReviews >= 1)
+      _unlockBadge('first_review');
   }
 
   final Map<String, bool> _badges = {
+    'first_review': false,
     'text_review_5': false,
-    'image_review_5': false,
     'text_review_10': false,
-    'image_review_10': false,
     'text_review_50': false,
+    'image_review_5': false,
+    'image_review_10': false,
     'image_review_50': false,
+    'total_review_100': false,
+    'text_review_100': false,
+    'image_review_100': false,
+    'review_day_7': false,
+    'review_day_30': false,
+  };
+
+  final Map<String, String> badgeNames = {
+    'first_review': '첫 발걸음',
+    'text_review_5': '텍스트 초보',
+    'image_review_5': '사진 초보',
+    'text_review_10': '텍스트 중수',
+    'image_review_10': '사진 중수',
+    'text_review_50': '텍스트 장인',
+    'image_review_50': '이미지 장인',
+    'text_review_100': '칼보다 강함',
+    'image_review_100': '전문 사진작가',
+    'total_review_100': '리뷰왕',
+    'review_day_7': '꾸준한 리뷰어',
+    'review_day_30': '지독한 리뷰어',
   };
 
   Map<String, bool> get badges => Map.unmodifiable(_badges);
