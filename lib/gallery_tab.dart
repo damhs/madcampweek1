@@ -99,7 +99,18 @@ class _GalleryTabState extends State<GalleryTab>
                       color: Colors.red,
                     ),
                     onPressed: () {
-                      // 삭제 기능 구현
+                      setState(() {
+                        _showDeleteImageDialog(context).then((isDelete) {
+                          if (isDelete == true) {
+                            for (int i = 0; i < currentImages.length; i++) {
+                              if (currentImages[i]['isSelected'] == 'true') {
+                                context.read<AppState>().deleteImageItem(i - i);
+                              }
+                            }
+                            isImageSelectionMode = false;
+                          }
+                        });
+                      });
                       setState(() {
                         isImageSelectionMode = false;
                       });
@@ -121,6 +132,9 @@ class _GalleryTabState extends State<GalleryTab>
                         color: Colors.purple),
                     onPressed: () {
                       setState(() {
+                        for (int i = 0; i < currentImages.length; i++) {
+                          currentImages[i]['isSelected'] = 'false';
+                        }
                         isImageSelectionMode = true;
                       });
                     },
@@ -236,7 +250,6 @@ class _GalleryTabState extends State<GalleryTab>
                       onPressed: () {
                         Provider.of<AppState>(context, listen: false)
                             .pickImageFromCamera(context, currentFolder);
-                        Navigator.pop(context);
                       },
                       child: Column(
                         children: [
@@ -260,7 +273,6 @@ class _GalleryTabState extends State<GalleryTab>
                       onPressed: () {
                         Provider.of<AppState>(context, listen: false)
                             .pickImageFromGallery(context, currentFolder);
-                        Navigator.pop(context);
                       },
                       child: Column(
                         children: [
@@ -556,7 +568,10 @@ class _GalleryTabState extends State<GalleryTab>
         ? GestureDetector(
             onTap: () {
               setState(() {
-                images[imageItemIndex]['isSelected'] = 'true';
+                images[imageItemIndex]['isSelected'] =
+                    images[imageItemIndex]['isSelected'] == 'true'
+                        ? 'false'
+                        : 'true';
               });
             },
             child: images[imageItemIndex]['isSelected'] == 'true'
@@ -599,10 +614,9 @@ class _GalleryTabState extends State<GalleryTab>
                         right: 5,
                         child: Container(
                           padding: const EdgeInsets.all(5.0),
-                          color: Colors.black.withOpacity(0.5),
                           child: const Icon(
                             Icons.check_circle,
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -647,9 +661,8 @@ class _GalleryTabState extends State<GalleryTab>
                         right: 5,
                         child: Container(
                           padding: const EdgeInsets.all(5.0),
-                          color: Colors.black.withOpacity(0.5),
                           child: const Icon(
-                            Icons.check_circle,
+                            Icons.circle,
                             color: Colors.white,
                           ),
                         ),
@@ -716,6 +729,33 @@ class _GalleryTabState extends State<GalleryTab>
               ],
             ),
           );
+  }
+
+  Future<bool> _showDeleteImageDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('이미지 삭제'),
+          content: const Text('선택한 이미지를 삭제하시겠습니까?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text('삭제'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result ?? false;
   }
 }
 
@@ -886,21 +926,5 @@ class _FolderMovePageState extends State<FolderMovePage> {
         ),
       ),
     );
-    // return Padding(
-    //   padding: const EdgeInsets.all(8.0),
-    //   child: Column(
-    //     children: [
-    //       Icon(
-    //         Icons.folder,
-    //         size: 80,
-    //         color: Color(0xFF33CCCC),
-    //       ),
-    //       Text(
-    //         folders[folderIndex],
-    //         style: const TextStyle(color: Colors.black),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 }
