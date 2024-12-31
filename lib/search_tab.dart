@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:madcampweek1/main.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'review_tab.dart';
@@ -119,25 +120,7 @@ class _SearchTabState extends State<SearchTab> {
             ),
             TextButton(
               onPressed: () {
-                // Navigator.of(context).pop();
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => ImageItemDetailPage(
-                //       folderIndex: 0, // Add appropriate value for folderIndex
-                //       imageItemIndex: context.read<AppState>().images.length,
-                //       image: book['imageLinks']['thumbnail'],
-                //       description: '',
-                //       timestamp: DateTime.now().toString(),
-                //       onDelete: (folderIndex, imageIndex) => context
-                //           .read<AppState>()
-                //           .deleteImage(folderIndex, imageIndex),
-                //       onSave: (index, newDescription) => context
-                //           .read<AppState>()
-                //           .editImage(index, newDescription),
-                //     ),
-                //   ),
-                // );
+                context.read<AppState>().pickImageFromCamera(context, '');
               },
               child: const Text('사진'),
               style: TextButton.styleFrom(foregroundColor: Colors.black),
