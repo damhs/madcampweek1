@@ -136,22 +136,26 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void editFolder(int index, String folderName) {
-    _folders[index] = folderName;
+  void editFolder(String folderName, String newFolderName) {
+    final index = _folders.indexOf(folderName);
+    _folders[index] = newFolderName;
     for (var imageItem in _imageItems) {
-      if (imageItem['folder'] == _folders[index]) {
-        imageItem['folder'] = folderName;
+      if (imageItem['folderName'] == folderName) {
+        imageItem['folderName'] = newFolderName;
       }
     }
     _saveFolders();
+    _saveImageItems();
     notifyListeners();
   }
 
-  void deleteFolder(int index) {
+  void deleteFolder(String folderName) {
+    final index = _folders.indexOf(folderName);
     _folders.removeAt(index);
     _imageItems
-        .removeWhere((imageItem) => imageItem['folder'] == _folders[index]);
+        .removeWhere((imageItem) => imageItem['folderName'] == folderName);
     _saveFolders();
+    _saveImageItems();
     notifyListeners();
   }
 

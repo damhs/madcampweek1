@@ -18,6 +18,7 @@ class _GalleryTabState extends State<GalleryTab>
   bool get wantKeepAlive => true;
   String currentFolder = '나의 독서 앨범';
   bool isSelectionMode = false;
+  bool isFolderSelectionMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -226,70 +227,172 @@ class _GalleryTabState extends State<GalleryTab>
           Navigator.pop(context);
           return;
         } else if (folderIndex == folders.length + 1) {
-          _showCreateFolderDialog(context).then((folderName) {
-            if (folderName != null) {
-              context.read<AppState>().addFolder(folderName);
-            }
-          });
+          if (isFolderSelectionMode) {
+            setState(() {
+              isFolderSelectionMode = false;
+            });
+          } else {
+            _showCreateFolderDialog(context).then((folderName) {
+              if (folderName != null) {
+                context.read<AppState>().addFolder(folderName);
+              }
+            });
+          }
           return;
         } else {
-          setState(() {
-            currentFolder = folders[folderIndex - 1];
-          });
+          if (isFolderSelectionMode) {
+            _showDeleteFolderDialog(context).then((isDelete) {
+              currentFolder = folders[folderIndex - 1];
+              context.read<AppState>().deleteFolder(currentFolder);
+              setState(() {
+                currentFolder = '나의 독서 앨범';
+                isFolderSelectionMode = false;
+              });
+            });
+          } else {
+            setState(() {
+              currentFolder = folders[folderIndex - 1];
+            });
+          }
         }
         Navigator.pop(context);
       },
-      child: folderIndex == 0
-          ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.photo_library,
-                    size: 80,
-                    color: Color(0xFF33CCCC),
-                  ),
-                  const Text(
-                    '나의 독서 앨범',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            )
-          : folderIndex == folders.length + 1
+      onDoubleTap: () {
+        // 배포 전에 onLongPress로 바꾸기
+        if (folderIndex != 0 && folderIndex != folders.length + 1) {
+          setState(() {
+            isFolderSelectionMode = true;
+          });
+        }
+      },
+      child: isFolderSelectionMode
+          ? folderIndex == 0
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
                       Icon(
-                        Icons.add,
+                        Icons.photo_library,
                         size: 80,
                         color: Color(0xFF33CCCC),
                       ),
                       const Text(
-                        '새 폴더',
+                        '나의 독서 앨범',
                         style: TextStyle(color: Colors.black),
                       ),
                     ],
                   ),
                 )
-              : Padding(
+              : folderIndex == folders.length + 1
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 80,
+                            color: Color(0xFF33CCCC),
+                          ),
+                          const Text(
+                            '완료',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.folder_delete,
+                            size: 80,
+                            color: Color(0xFF33CCCC),
+                          ),
+                          Text(
+                            folders[folderIndex - 1],
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    )
+          : folderIndex == 0
+              ? Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
                       Icon(
-                        Icons.folder,
+                        Icons.photo_library,
                         size: 80,
                         color: Color(0xFF33CCCC),
                       ),
-                      Text(
-                        folders[folderIndex - 1],
-                        style: const TextStyle(color: Colors.black),
+                      const Text(
+                        '나의 독서 앨범',
+                        style: TextStyle(color: Colors.black),
                       ),
                     ],
                   ),
-                ),
+                )
+              : folderIndex == folders.length + 1
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.add,
+                            size: 80,
+                            color: Color(0xFF33CCCC),
+                          ),
+                          const Text(
+                            '새 폴더',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.folder,
+                            size: 80,
+                            color: Color(0xFF33CCCC),
+                          ),
+                          Text(
+                            folders[folderIndex - 1],
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    ),
     );
+  }
+
+  Future<bool> _showDeleteFolderDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('폴더 삭제'),
+          content: Text('정말로 이 폴더를 삭제하시겠습니까?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('삭제'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ).then((value) => value ?? false);
   }
 
   Future<String?> _showCreateFolderDialog(BuildContext context) {
