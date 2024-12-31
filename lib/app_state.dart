@@ -28,7 +28,7 @@ class AppState extends ChangeNotifier {
     _loadFolders();
     _loadImageItems();
     _loadProfile();
-    _loadReviewDates();
+    _loadMarkedDates();
   }
 
   // SharedPreferences에서 데이터 로드
@@ -51,17 +51,14 @@ class AppState extends ChangeNotifier {
 
   // 새로운 리뷰 추가
   void addReview(Map<String, String> newReview) {
+    final now = DateTime.now();
+    final formattedDate = DateFormat('yyyy-MM-dd').format(now);
     _reviews.add(newReview);
     _totalTextReviews++;
+    final reviewDate = DateTime.parse(formattedDate);
+    addMarkedDate(reviewDate);
     _saveReviews();
     _saveReviewCounts();
-    final date = newReview['date']!.split(' ')[0];
-    if (!_reviewDates.contains(date)) {
-      _reviewDates.add(date);
-      print("새로운 날짜 추가: $date");
-      print("리뷰 날짜: $_reviewDates");
-      _saveReviewDates();
-    }
     notifyListeners();
     _checkBadgeUnlock();
   }
@@ -462,40 +459,50 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  //주간 캘린더
-  List<String> getWeeklyReviewDates() {
-    final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final endOfWeek = startOfWeek.add(Duration(days: 6));
+  final List<DateTime> _markedDates = [];
 
-    print("현재 날짜: $now");
-    print("이번 주 시작: $startOfWeek");
-    print("이번 주 끝: $endOfWeek");
+  // 마커 데이터 접근자
+  List<DateTime> get markedDates => List.unmodifiable(_markedDates);
 
-    final result = _reviewDates.where((date) {
-      final reviewDate = DateTime.parse(date).toUtc(); // UTC로 변환
-      final isInRange = reviewDate.isAtSameMomentAs(startOfWeek.toUtc()) ||
-          reviewDate.isAtSameMomentAs(endOfWeek.toUtc()) ||
-          (reviewDate.isAfter(startOfWeek.toUtc()) &&
-              reviewDate.isBefore(endOfWeek.toUtc()));
-      print("검사 중인 날짜: $reviewDate, 범위 내: $isInRange");
-      return isInRange;
-    }).toList();
-
-    print("이번 주 리뷰 날짜: $result");
-    return result;
+  void addMarkedDate(DateTime date) {
+    if (!_markedDates.any((d) =>
+        d.year == date.year && d.month == date.month && d.day == date.day)) {
+      _markedDates.add(date);
+      _saveMarkedDates(); // 저장
+      notifyListeners();
+    }
   }
 
-  List<String> _reviewDates = [];
-  List<String> get reviewDates => List.unmodifiable(_reviewDates);
-  Future<void> _saveReviewDates() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('reviewDates', _reviewDates);
+  void removeMarkedDate(DateTime date) {
+    _markedDates.removeWhere((d) =>
+        d.year == date.year && d.month == date.month && d.day == date.day);
+    _saveMarkedDates(); // 저장
+    notifyListeners();
   }
 
-  Future<void> _loadReviewDates() async {
+  List<DateTime> get reviewDates {
+    final dates =
+        _reviews.map((review) => DateTime.parse(review['date']!)).toList();
+
+    // 디버깅용 출력
+    print('마커 표시 날짜(추출됨): $dates');
+    return dates;
+  }
+
+  Future<void> _saveMarkedDates() async {
     final prefs = await SharedPreferences.getInstance();
-    _reviewDates = prefs.getStringList('reviewDates') ?? [];
+    final markedDatesStrings =
+        _markedDates.map((date) => date.toIso8601String()).toList();
+    await prefs.setStringList('markedDates', markedDatesStrings);
+  }
+
+  // 마커 로드 메서드
+  Future<void> _loadMarkedDates() async {
+    final prefs = await SharedPreferences.getInstance();
+    final markedDatesStrings = prefs.getStringList('markedDates') ?? [];
+    _markedDates.clear();
+    _markedDates.addAll(
+        markedDatesStrings.map((dateString) => DateTime.parse(dateString)));
     notifyListeners();
   }
 }
