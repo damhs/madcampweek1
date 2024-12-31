@@ -212,8 +212,72 @@ class _ProfileTabState extends State<ProfileTab> {
 
   void _showImageSourceSelector(BuildContext context, AppState appState) {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       builder: (BuildContext context) {
+        return SizedBox(
+          height: 150,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton(
+                style: ButtonStyle(
+                  maximumSize: WidgetStateProperty.all(Size(100, 100)),
+                ),
+                onPressed: () async {
+                  final image =
+                      await _picker.pickImage(source: ImageSource.camera);
+                  if (image != null) {
+                    appState.updateProfileImage(File(image.path));
+                  }
+                  Navigator.pop(context);
+                },
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/img/camera.png',
+                      width: 50,
+                      height: 50,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      '카메라',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                style: ButtonStyle(
+                  maximumSize: WidgetStateProperty.all(Size(100, 100)),
+                ),
+                onPressed: () async {
+                  final image =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    appState.updateProfileImage(File(image.path));
+                  }
+                  Navigator.pop(context);
+                },
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/img/gallery.png',
+                      width: 50,
+                      height: 50,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      '갤러리',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+        /*
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -242,7 +306,7 @@ class _ProfileTabState extends State<ProfileTab> {
               },
             ),
           ],
-        );
+        );*/
       },
     );
   }

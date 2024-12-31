@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           onSurface: Colors.black,
         ),
         scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Pretendard',
+        fontFamily: 'MoneyGraphy',
         textTheme: const TextTheme(
           bodyLarge:
               TextStyle(fontSize: 16.0, color: Color.fromARGB(255, 0, 0, 0)),
