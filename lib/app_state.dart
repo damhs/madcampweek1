@@ -352,13 +352,13 @@ class AppState extends ChangeNotifier {
     _totalTextReviews = prefs.getInt('totalTextReviews') ?? 0;
     _totalImageReviews = prefs.getInt('totalImageReviews') ?? 0;
     _badges['text_review_5'] = prefs.getBool('text_review_5') ?? false;
-    _badges['image_review_5'] = prefs.getBool('image_review_5') ?? false;
+    _badges['photo_review_5'] = prefs.getBool('photo_review_5') ?? false;
     _badges['text_review_10'] = prefs.getBool('text_review_10') ?? false;
-    _badges['image_review_10'] = prefs.getBool('image_review_10') ?? false;
+    _badges['photo_review_10'] = prefs.getBool('photo_review_10') ?? false;
     _badges['text_review_50'] = prefs.getBool('text_review_50') ?? false;
-    _badges['image_review_50'] = prefs.getBool('image_review_50') ?? false;
+    _badges['photo_review_50'] = prefs.getBool('photo_review_50') ?? false;
     _badges['text_review_100'] = prefs.getBool('text_review_100') ?? false;
-    _badges['image_review_100'] = prefs.getBool('image_review_100') ?? false;
+    _badges['photo_review_100'] = prefs.getBool('photo_review_100') ?? false;
     _badges['total_review_100'] = prefs.getBool('total_review_100') ?? false;
     _badges['review_day_7'] = prefs.getBool('review_day_7') ?? false;
     _badges['review_day_30'] = prefs.getBool('review_day_30') ?? false;
@@ -421,13 +421,13 @@ class AppState extends ChangeNotifier {
 
   void _checkBadgeUnlock() {
     if (_totalTextReviews >= 5) _unlockBadge('text_review_5');
-    if (_totalImageReviews >= 5) _unlockBadge('image_review_5');
+    if (_totalImageReviews >= 5) _unlockBadge('photo_review_5');
     if (_totalTextReviews >= 10) _unlockBadge('text_review_10');
-    if (_totalImageReviews >= 10) _unlockBadge('image_review_10');
+    if (_totalImageReviews >= 10) _unlockBadge('photo_review_10');
     if (_totalTextReviews >= 50) _unlockBadge('text_review_50');
-    if (_totalImageReviews >= 50) _unlockBadge('image_review_50');
+    if (_totalImageReviews >= 50) _unlockBadge('photo_review_50');
     if (_totalTextReviews >= 100) _unlockBadge('text_review_100');
-    if (_totalImageReviews >= 100) _unlockBadge('image_review_100');
+    if (_totalImageReviews >= 100) _unlockBadge('photo_review_100');
     if (_totalTextReviews + _totalImageReviews >= 100)
       _unlockBadge('total_review_100');
     if (uploadDayCount >= 7) _unlockBadge('review_day_7');
@@ -441,12 +441,12 @@ class AppState extends ChangeNotifier {
     'text_review_5': false,
     'text_review_10': false,
     'text_review_50': false,
-    'image_review_5': false,
-    'image_review_10': false,
-    'image_review_50': false,
+    'photo_review_5': false,
+    'photo_review_10': false,
+    'photo_review_50': false,
     'total_review_100': false,
     'text_review_100': false,
-    'image_review_100': false,
+    'photo_review_100': false,
     'review_day_7': false,
     'review_day_30': false,
   };
@@ -454,13 +454,13 @@ class AppState extends ChangeNotifier {
   final Map<String, String> badgeNames = {
     'first_review': '첫 발걸음',
     'text_review_5': '텍스트 초보',
-    'image_review_5': '사진 초보',
+    'photo_review_5': '사진 초보',
     'text_review_10': '텍스트 중수',
-    'image_review_10': '사진 중수',
+    'photo_review_10': '사진 중수',
     'text_review_50': '텍스트 장인',
-    'image_review_50': '이미지 장인',
+    'photo_review_50': '이미지 장인',
     'text_review_100': '칼보다 강함',
-    'image_review_100': '전문 사진작가',
+    'photo_review_100': '전문 사진작가',
     'total_review_100': '리뷰왕',
     'review_day_7': '꾸준한 리뷰어',
     'review_day_30': '지독한 리뷰어',
