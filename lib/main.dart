@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
           secondary: Colors.deepPurple, // Secondary 색상 정의
           onSurface: Colors.black,
         ),
+        appBarTheme: AppBarTheme(backgroundColor: Colors.white),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'MoneyGraphy',
         textTheme: const TextTheme(

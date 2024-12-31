@@ -20,6 +20,7 @@ class _ProfileTabState extends State<ProfileTab> {
     final appState = context.watch<AppState>();
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text(
           '프로필',
           style: TextStyle(color: Colors.black),
@@ -50,6 +51,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           },
                           child: CircleAvatar(
                             radius: 50,
+                            backgroundColor: Colors.teal[100],
                             backgroundImage: appState.profileImage != null
                                 ? FileImage(appState.profileImage!)
                                 : null,

@@ -27,7 +27,7 @@ class _GalleryTabState extends State<GalleryTab>
     final sizeX = MediaQuery.of(context).size.width;
     final sizeY = MediaQuery.of(context).size.height;
     final folders = Provider.of<AppState>(context).folders;
-    var currentImages;
+    List<Map<String, String>> currentImages;
     if (currentFolder == '나의 독서 앨범') {
       currentImages = Provider.of<AppState>(context).imageItems;
     } else {
@@ -40,6 +40,7 @@ class _GalleryTabState extends State<GalleryTab>
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
           leading: currentFolder == '나의 독서 앨범'
               ? Builder(
                   builder: (BuildContext context) {
@@ -123,7 +124,7 @@ class _GalleryTabState extends State<GalleryTab>
       ),
       body: currentImages.isEmpty
           ? const Center(child: Text('이미지가 없습니다.'))
-          : Container(
+          : SizedBox(
               width: sizeX,
               height: sizeY,
               child: GridView.builder(
@@ -151,18 +152,19 @@ class _GalleryTabState extends State<GalleryTab>
             backgroundColor: Colors.white,
             context: context,
             builder: (BuildContext context) {
-              return Container(
+              return SizedBox(
                 height: 150,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     TextButton(
                       style: ButtonStyle(
-                        maximumSize: MaterialStateProperty.all(Size(100, 100)),
+                        maximumSize: WidgetStateProperty.all(Size(100, 100)),
                       ),
                       onPressed: () {
                         Provider.of<AppState>(context, listen: false)
                             .pickImageFromCamera(context, currentFolder);
+                        Navigator.pop(context);
                       },
                       child: Column(
                         children: [
@@ -181,11 +183,12 @@ class _GalleryTabState extends State<GalleryTab>
                     ),
                     TextButton(
                       style: ButtonStyle(
-                        maximumSize: MaterialStateProperty.all(Size(100, 100)),
+                        maximumSize: WidgetStateProperty.all(Size(100, 100)),
                       ),
                       onPressed: () {
                         Provider.of<AppState>(context, listen: false)
                             .pickImageFromGallery(context, currentFolder);
+                        Navigator.pop(context);
                       },
                       child: Column(
                         children: [
@@ -641,7 +644,7 @@ class ImageItemDetailPage extends StatefulWidget {
   final Function(int imageItemIndex, String description) onSave;
 
   const ImageItemDetailPage({
-    Key? key,
+    super.key,
     required this.imageItemIndex,
     required this.image,
     required this.description,
@@ -649,7 +652,7 @@ class ImageItemDetailPage extends StatefulWidget {
     required this.folderName,
     required this.onDelete,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _ImageItemDetailPageState createState() => _ImageItemDetailPageState();
@@ -674,6 +677,8 @@ class _ImageItemDetailPageState extends State<ImageItemDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -707,7 +712,6 @@ class _ImageItemDetailPageState extends State<ImageItemDetailPage> {
             ),
           ],
         ),
-        backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Column(

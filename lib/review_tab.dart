@@ -25,6 +25,7 @@ class _ReviewTabState extends State<ReviewTab>
 
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         title: Row(
           children: [
