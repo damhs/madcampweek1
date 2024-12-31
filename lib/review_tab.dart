@@ -154,6 +154,7 @@ class _ReviewTabState extends State<ReviewTab>
             MaterialPageRoute(
               builder: (context) => ReviewDetailPage(
                 review: review,
+                reviewIndex: index,
                 onSubmit: (updatedReview) =>
                     context.read<AppState>().editReview(index, updatedReview),
               ),
@@ -241,14 +242,14 @@ class ReviewDetailPage extends StatelessWidget {
   final Map<String, String>? review;
   final void Function(Map<String, String>) onSubmit;
   final int? reviewIndex;
-  final VoidCallback? onDelete;
+  //final void Function()? onDelete;
 
   const ReviewDetailPage({
     super.key,
     this.review,
     required this.onSubmit,
     this.reviewIndex,
-    this.onDelete,
+    //this.onDelete,
   });
 
   @override
@@ -268,14 +269,12 @@ class ReviewDetailPage extends StatelessWidget {
           if (review != null)
             TextButton(
               onPressed: () {
-                if (reviewIndex != null) {
-                  // deleteReview 함수 호출
+                try {
                   context.read<AppState>().deleteReview(reviewIndex!);
+                  //if (onDelete != null) onDelete!();
                   Navigator.pop(context);
-                  if (onDelete != null)
-                    onDelete!();
-                  else
-                    print('Review index is null');
+                } catch (e) {
+                  print('Error deleting review: $e');
                 }
               },
               child: const Text(
