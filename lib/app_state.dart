@@ -11,27 +11,22 @@ import 'dart:io';
 
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
-  // List<Map<String, String>> _imageItems = [];
-  int _folderAllImageItemIndex = -1;
-  int _currentFolderIndex = 0;
-  List<Map<String, List<Map<String, String>>>> _folders = [
-    {'전체': []}
-  ];
+  List<Map<String, String>> _imageItems = [];
+  List<String> _folders = [];
 
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _descriptionController = TextEditingController();
 
   // 데이터 가져오기 (Immutable)
   List<Map<String, String>> get reviews => List.unmodifiable(_reviews);
-  int get folderAllImageItemIndex => _folderAllImageItemIndex;
-  int get currentFolderIndex => _currentFolderIndex;
-  List<Map<String, List<Map<String, String>>>> get folders =>
-      List.unmodifiable(_folders);
+  List<Map<String, String>> get imageItems => List.unmodifiable(_imageItems);
+  List<String> get folders => List.unmodifiable(_folders);
 
   // 생성자: SharedPreferences에서 초기 데이터를 불러옴
   AppState() {
     _loadReviews();
     _loadFolders();
+    _loadImageItems();
     _loadProfile();
   }
 
@@ -113,7 +108,91 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> pickImageFromCamera(BuildContext context) async {
+  Future<void> _loadFolders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final foldersString = prefs.getString('folders');
+    if (foldersString != null) {
+      _folders = (jsonDecode(foldersString) as List).cast<String>();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveFolders() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('folders', jsonEncode(_folders));
+  }
+
+  void addFolder(String folderName) {
+    _folders.add(folderName);
+    _saveFolders();
+    notifyListeners();
+  }
+
+  void editFolder(int index, String folderName) {
+    _folders[index] = folderName;
+    _imageItems.forEach((imageItem) {
+      if (imageItem['folder'] == _folders[index]) {
+        imageItem['folder'] = folderName;
+      }
+    });
+    _saveFolders();
+    notifyListeners();
+  }
+
+  void deleteFolder(int index) {
+    _folders.removeAt(index);
+    _imageItems
+        .removeWhere((imageItem) => imageItem['folder'] == _folders[index]);
+    _saveFolders();
+    notifyListeners();
+  }
+
+  Future<void> _loadImageItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imageItemsString = prefs.getString('imageItems');
+    if (imageItemsString != null) {
+      _imageItems = (jsonDecode(imageItemsString) as List)
+          .map((imageItem) => Map<String, String>.from(imageItem))
+          .toList();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveImageItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('imageItems', jsonEncode(_imageItems));
+  }
+
+  void addImageItem(
+      String folderName, String image, String description, String timestamp) {
+    _imageItems.add({
+      'folderName': folderName,
+      'image': image,
+      'description': description,
+      'timestamp': timestamp,
+      'isSelected': 'false',
+    });
+    _totalImageReviews++;
+    _saveImageItems();
+    _saveReviewCounts();
+    notifyListeners();
+    _checkBadgeUnlock();
+  }
+
+  void editImageItem(int index, String description) {
+    _imageItems[index]['description'] = description;
+    _saveImageItems();
+    notifyListeners();
+  }
+
+  void deleteImageItem(int index) {
+    _imageItems.removeAt(index);
+    _saveImageItems();
+    notifyListeners();
+  }
+
+  Future<void> pickImageFromCamera(
+      BuildContext context, String folderName) async {
     bool havePermission = false;
     final request = await Permission.camera.request();
     havePermission = request.isGranted;
@@ -123,23 +202,21 @@ class AppState extends ChangeNotifier {
           await _picker.pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         _descriptionController.text = '';
-        addImageItemToFolder(0, pickedFile.path, _descriptionController.text,
+        addImageItem(folderName, pickedFile.path, _descriptionController.text,
             DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ImageItemDetailPage(
-              folderIndex: _currentFolderIndex,
-              imageItemIndex: _folders[currentFolderIndex].values.first.length,
+              imageItemIndex: _imageItems.length,
               image: pickedFile.path,
               description: '',
               timestamp:
                   DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-              onDelete: (int folderIndex, int imageItemIndex) =>
-                  deleteImageItemFromFolder(folderIndex, imageItemIndex),
-              onSave:
-                  (int folderIndex, int imageItemIndex, String description) =>
-                      editImageItemInFolder(0, imageItemIndex, description),
+              folderName: folderName,
+              onDelete: (int imageItemIndex) => deleteImageItem(imageItemIndex),
+              onSave: (int imageItemIndex, String description) =>
+                  editImageItem(imageItemIndex, description),
             ),
           ),
         );
@@ -151,7 +228,8 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> pickImageFromGallery(BuildContext context) async {
+  Future<void> pickImageFromGallery(
+      BuildContext context, String folderName) async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     print(androidInfo);
@@ -173,21 +251,22 @@ class AppState extends ChangeNotifier {
           await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         _descriptionController.text = '';
-        addImageItemToFolder(0, pickedFile.path, _descriptionController.text,
+        addImageItem(folderName, pickedFile.path, _descriptionController.text,
             DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ImageItemDetailPage(
-              folderIndex: _currentFolderIndex,
-              imageItemIndex: _folders[currentFolderIndex].values.first.length,
+              imageItemIndex: _imageItems.length,
               image: pickedFile.path,
               description: '',
               timestamp:
                   DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-              onDelete: (int folderIndex, int imageItemIndex) =>
-                  deleteImageItemFromFolder(folderIndex, imageItemIndex),
-              onSave: editImageItemInFolder,
+              folderName: folderName,
+              onDelete: (int imageItemIndex) => deleteImageItem(imageItemIndex),
+              onSave: (int imageItemIndex, String description) {
+                editImageItem(imageItemIndex, description);
+              },
             ),
           ),
         );
@@ -197,108 +276,6 @@ class AppState extends ChangeNotifier {
         const SnackBar(content: Text('갤러리 접근 권한이 필요합니다.')),
       );
     }
-  }
-
-  Future<void> _loadFolders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final folders = prefs.getStringList('folders');
-    if (folders != null) {
-      _folders = (folders.map((folder) =>
-              jsonDecode(folder) as Map<String, List<Map<String, String>>>))
-          .toList();
-      notifyListeners();
-    }
-  }
-
-  Future<void> _saveFolders() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-        'folders', _folders.map((folder) => jsonEncode(folder)).toList());
-  }
-
-  void addFolder(String folderName) {
-    _folders.add({folderName: []});
-    _saveFolders();
-    notifyListeners();
-  }
-
-  void editFolder(int index, String folderName) {
-    final folder = _folders[index];
-    _folders[index] = {folderName: folder.values.first};
-    _saveFolders();
-    notifyListeners();
-  }
-
-  void deleteFolder(int index) {
-    _folders.removeAt(index);
-    _saveFolders();
-    notifyListeners();
-  }
-
-  void addImageItemToFolder(
-      int folderIndex, String image, String description, String timestamp) {
-    final folder = _folders[folderIndex];
-    final folderName = folder.keys.first;
-    final images = folder.values.first;
-    images.add({
-      'image': image,
-      'description': description,
-      'timestamp': timestamp,
-    });
-    _folders[folderIndex] = {folderName: images};
-    if (folderIndex != 0) {
-      final allFolder = _folders[0];
-      final allImages = allFolder.values.first;
-      allImages.add({
-        'image': image,
-        'description': description,
-        'timestamp': timestamp,
-      });
-      _folders[0] = {allFolder.keys.first: allImages};
-    }
-    _folderAllImageItemIndex++;
-    _saveFolders();
-    notifyListeners();
-  }
-
-  void editImageItemInFolder(
-      int folderIndex, int imageItemIndex, String description) {
-    final folder = _folders[folderIndex]; // Assuming folderIndex is always 0
-    final folderName = folder.keys.first;
-    final images = folder.values.first;
-    images[imageItemIndex]['description'] = description;
-    _folders[folderIndex] = {folderName: images};
-    if (folderIndex != 0) {
-      final allFolder = _folders[0];
-      final allImages = allFolder.values.first;
-      for (int i = 0; i < folderIndex; i++) {
-        imageItemIndex += _folders[i].values.first.length;
-      }
-      allImages[imageItemIndex]['description'] = description;
-      _folders[0] = {allFolder.keys.first: allImages};
-    }
-    _saveFolders();
-    notifyListeners();
-  }
-
-  void deleteImageItemFromFolder(int folderIndex, int imageItemIndex) {
-    final folder = _folders[folderIndex];
-    final folderName = folder.keys.first;
-    final images = folder.values.first;
-    images.removeAt(imageItemIndex);
-    _folders[folderIndex] = {folderName: images};
-    if (folderIndex != 0) {
-      final allFolder = _folders[0];
-      final allImages = allFolder.values.first;
-      for (int i = 0; i < folderIndex; i++) {
-        imageItemIndex += _folders[i].values.first.length;
-      }
-      allImages.removeAt(imageItemIndex);
-      _folders[0] = {allFolder.keys.first: allImages};
-    }
-    _folderAllImageItemIndex--;
-    _saveFolders();
-    notifyListeners();
   }
 
   //최근 검색어
@@ -403,14 +380,14 @@ class AppState extends ChangeNotifier {
   }
 
   int get reviewCount => _reviews.length;
-  int get imageCount => _folderAllImageItemIndex + 2;
+  int get imageCount => _imageItems.length;
   int get uploadDayCount {
     final Set<String> uniqueDays = _reviews
         .map((review) => review['date']!.split(' ')[0]) // 리뷰 날짜 (yyyy-MM-dd)
         .toSet()
       ..addAll(
-        _folders[0]['전체']!
-            .map((image) => image['timestamp']!.split(' ')[0]), // 이미지 업로드 날짜
+        _imageItems.map(
+            (imageItem) => imageItem['timestamp']!.split(' ')[0]), // 이미지 업로드 날짜
       );
     return uniqueDays.length;
   }
