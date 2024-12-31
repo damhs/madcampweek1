@@ -22,7 +22,7 @@ class GalleryTab extends StatefulWidget {
 
 class _GalleryTabState extends State<GalleryTab>
     with AutomaticKeepAliveClientMixin {
-  int? _currentFolderIndex;
+  int _currentFolderIndex = 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -36,7 +36,7 @@ class _GalleryTabState extends State<GalleryTab>
           title: Text('새 폴더 만들기'),
           content: TextField(
             controller: folderNameController,
-            decoration: InputDecoration(hintText: '폴더 이름을 입력하세요'),
+            decoration: InputDecoration(helperText: '새 폴더'),
           ),
           actions: <Widget>[
             TextButton(
@@ -59,11 +59,11 @@ class _GalleryTabState extends State<GalleryTab>
 
   Widget _buildFolder(
       {required List<Map<String, List<Map<String, String>>>> folders,
-      required int index}) {
+      required int folderIndex}) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _currentFolderIndex = index;
+          _currentFolderIndex = folderIndex;
         });
         Navigator.pop(context);
       },
@@ -77,7 +77,7 @@ class _GalleryTabState extends State<GalleryTab>
                 color: Color(0xFF33CCCC),
               ),
               Text(
-                folders[index].keys.first,
+                folders[folderIndex].keys.first,
                 style: const TextStyle(color: Colors.black),
               ),
             ],
@@ -88,20 +88,33 @@ class _GalleryTabState extends State<GalleryTab>
   }
 
   Widget _buildImage(
-      {required List<Map<String, String>> images, required int index}) {
+      {required List<Map<String, List<Map<String, String>>>> folders,
+      required int folderIndex,
+      required int imageItemIndex}) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => GalleryDetailPage(
-              index: index,
-              image: images[index]['image']!,
-              description: images[index]['description']!,
-              timestamp: images[index]['timestamp']!,
-              onDelete:
-                  Provider.of<AppState>(context, listen: false).deleteImage,
-              onSave: Provider.of<AppState>(context, listen: false).editImage,
+            builder: (context) => ImageItemDetailPage(
+              folderIndex: folderIndex,
+              imageItemIndex: imageItemIndex,
+              image: folders[folderIndex].values.first[imageItemIndex]
+                  ['image']!,
+              description: folders[folderIndex].values.first[imageItemIndex]
+                  ['description']!,
+              timestamp: folders[folderIndex].values.first[imageItemIndex]
+                  ['timestamp']!,
+              onDelete: (int folderIndex, int index) {
+                context
+                    .read<AppState>()
+                    .deleteImageItemFromFolder(folderIndex, index);
+              },
+              onSave: (int folderIndex, int index, String description) {
+                context
+                    .read<AppState>()
+                    .editImageItemInFolder(folderIndex, index, description);
+              },
             ),
           ),
         );
@@ -111,7 +124,9 @@ class _GalleryTabState extends State<GalleryTab>
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: FileImage(File(images[index]['image']!)),
+                image: FileImage(File(folders[folderIndex]
+                    .values
+                    .first[imageItemIndex]['image']!)),
                 fit: BoxFit.cover,
               ),
             ),
@@ -131,7 +146,7 @@ class _GalleryTabState extends State<GalleryTab>
             child: Container(
               padding: const EdgeInsets.all(5.0),
               child: Text(
-                images[index]['timestamp']!,
+                folders[folderIndex].values.first[imageItemIndex]['timestamp']!,
                 style: const TextStyle(
                   fontSize: 12.0,
                   color: Colors.white,
@@ -148,15 +163,15 @@ class _GalleryTabState extends State<GalleryTab>
   Widget build(BuildContext context) {
     super.build(context);
     final folders = Provider.of<AppState>(context).folders;
-    final currentImages = _currentFolderIndex == null
+    final currentImages = _currentFolderIndex == 0
         ? folders[0].values.first
-        : folders[_currentFolderIndex!].values.first;
+        : folders[_currentFolderIndex].values.first;
     final sizeX = MediaQuery.of(context).size.width;
     final sizeY = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
-        leading: _currentFolderIndex == null
+        leading: _currentFolderIndex == 0
             ? Builder(
                 builder: (BuildContext context) {
                   return IconButton(
@@ -177,7 +192,7 @@ class _GalleryTabState extends State<GalleryTab>
                 onPressed: () {
                   setState(
                     () {
-                      _currentFolderIndex = null;
+                      _currentFolderIndex = 0;
                     },
                   );
                 },
@@ -227,8 +242,8 @@ class _GalleryTabState extends State<GalleryTab>
         backgroundColor: Colors.teal[50],
         child: ListView.builder(
           itemCount: folders.length,
-          itemBuilder: (context, index) {
-            return _buildFolder(folders: folders, index: index);
+          itemBuilder: (context, folderIndex) {
+            return _buildFolder(folders: folders, folderIndex: folderIndex);
           },
         ),
       ),
@@ -247,7 +262,10 @@ class _GalleryTabState extends State<GalleryTab>
                 itemCount: currentImages.length,
                 padding: const EdgeInsets.all(5.0),
                 itemBuilder: (context, index) {
-                  return _buildImage(images: currentImages, index: index);
+                  return _buildImage(
+                      folders: folders,
+                      folderIndex: _currentFolderIndex,
+                      imageItemIndex: index);
                 },
               ),
             ),
@@ -323,17 +341,20 @@ class _GalleryTabState extends State<GalleryTab>
   }
 }
 
-class GalleryDetailPage extends StatefulWidget {
-  final int index;
+class ImageItemDetailPage extends StatefulWidget {
+  final int folderIndex;
+  final int imageItemIndex;
   final String image;
   final String description;
   final String timestamp;
-  final Function(int index) onDelete;
-  final Function(int index, String description) onSave;
+  final Function(int folderIndex, int imageItemIndex) onDelete;
+  final Function(int folderIndex, int imageItemIndex, String description)
+      onSave;
 
-  const GalleryDetailPage({
+  const ImageItemDetailPage({
     Key? key,
-    required this.index,
+    required this.folderIndex,
+    required this.imageItemIndex,
     required this.image,
     required this.description,
     required this.timestamp,
@@ -342,10 +363,10 @@ class GalleryDetailPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GalleryDetailPageState createState() => _GalleryDetailPageState();
+  _ImageItemDetailPageState createState() => _ImageItemDetailPageState();
 }
 
-class _GalleryDetailPageState extends State<GalleryDetailPage> {
+class _ImageItemDetailPageState extends State<ImageItemDetailPage> {
   late TextEditingController _descriptionController;
 
   @override
@@ -383,7 +404,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
               color: Colors.red,
               onPressed: () {
                 Navigator.pop(context);
-                widget.onDelete(widget.index);
+                widget.onDelete(widget.folderIndex, widget.imageItemIndex);
               },
             ),
             IconButton(
@@ -391,7 +412,8 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
               color: Colors.purple,
               onPressed: () {
                 Navigator.pop(context);
-                widget.onSave(widget.index, _descriptionController.text);
+                widget.onSave(widget.folderIndex, widget.imageItemIndex,
+                    _descriptionController.text);
               },
             ),
           ],

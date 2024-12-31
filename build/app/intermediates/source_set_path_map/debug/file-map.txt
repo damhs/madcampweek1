@@ -40,7 +40,8 @@ com.example.madcampweek1.app-packageDebugResources-38 /Users/ihansaem/project/ma
 com.example.madcampweek1.app-packageDebugResources-39 /Users/ihansaem/project/madcampweek1/build/app/intermediates/incremental/debug/packageDebugResources/stripped.dir
 com.example.madcampweek1.app-merged_res-40 /Users/ihansaem/project/madcampweek1/build/app/intermediates/merged_res/debug
 com.example.madcampweek1.app-packaged_res-41 /Users/ihansaem/project/madcampweek1/build/device_info_plus/intermediates/packaged_res/debug
-com.example.madcampweek1.app-packaged_res-42 /Users/ihansaem/project/madcampweek1/build/flutter_plugin_android_lifecycle/intermediates/packaged_res/debug
-com.example.madcampweek1.app-packaged_res-43 /Users/ihansaem/project/madcampweek1/build/image_picker_android/intermediates/packaged_res/debug
-com.example.madcampweek1.app-packaged_res-44 /Users/ihansaem/project/madcampweek1/build/permission_handler_android/intermediates/packaged_res/debug
-com.example.madcampweek1.app-packaged_res-45 /Users/ihansaem/project/madcampweek1/build/shared_preferences_android/intermediates/packaged_res/debug
+com.example.madcampweek1.app-packaged_res-42 /Users/ihansaem/project/madcampweek1/build/flutter_native_splash/intermediates/packaged_res/debug
+com.example.madcampweek1.app-packaged_res-43 /Users/ihansaem/project/madcampweek1/build/flutter_plugin_android_lifecycle/intermediates/packaged_res/debug
+com.example.madcampweek1.app-packaged_res-44 /Users/ihansaem/project/madcampweek1/build/image_picker_android/intermediates/packaged_res/debug
+com.example.madcampweek1.app-packaged_res-45 /Users/ihansaem/project/madcampweek1/build/permission_handler_android/intermediates/packaged_res/debug
+com.example.madcampweek1.app-packaged_res-46 /Users/ihansaem/project/madcampweek1/build/shared_preferences_android/intermediates/packaged_res/debug
