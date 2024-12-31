@@ -262,64 +262,66 @@ class ReviewDetailPage extends StatelessWidget {
         TextEditingController(text: review?['content'] ?? '');
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
-        backgroundColor: Colors.white,
-        actions: [
-          if (review != null)
+        appBar: AppBar(
+          title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
+          backgroundColor: Colors.white,
+          actions: [
+            if (review != null)
+              TextButton(
+                onPressed: () {
+                  try {
+                    context.read<AppState>().deleteReview(reviewIndex!);
+                    //if (onDelete != null) onDelete!();
+                    Navigator.pop(context);
+                  } catch (e) {
+                    print('Error deleting review: $e');
+                  }
+                },
+                child: const Text(
+                  '삭제',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              ),
             TextButton(
               onPressed: () {
-                try {
-                  context.read<AppState>().deleteReview(reviewIndex!);
-                  //if (onDelete != null) onDelete!();
-                  Navigator.pop(context);
-                } catch (e) {
-                  print('Error deleting review: $e');
-                }
+                final now = DateTime.now();
+                final formattedDate =
+                    DateFormat('yyyy-MM-dd HH:mm').format(now);
+
+                final newReview = {
+                  'title': titleController.text,
+                  'author': authorController.text,
+                  'genre': genreController.text,
+                  'content': contentController.text,
+                  'date': formattedDate,
+                };
+                onSubmit(newReview);
+                Navigator.pop(context);
               },
               child: const Text(
-                '삭제',
-                style: TextStyle(color: Colors.red, fontSize: 16),
+                '저장',
+                style: TextStyle(color: Colors.teal, fontSize: 16),
               ),
-            ),
-          TextButton(
-            onPressed: () {
-              final now = DateTime.now();
-              final formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now);
-
-              final newReview = {
-                'title': titleController.text,
-                'author': authorController.text,
-                'genre': genreController.text,
-                'content': contentController.text,
-                'date': formattedDate,
-              };
-              onSubmit(newReview);
-              Navigator.pop(context);
-            },
-            child: const Text(
-              '저장',
-              style: TextStyle(color: Colors.teal, fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildLinedTextField(controller: titleController, label: '제목'),
-            _buildLinedTextField(controller: authorController, label: '작가'),
-            _buildLinedTextField(controller: genreController, label: '장르'),
-            _buildLinedTextField(
-              controller: contentController,
-              label: '리뷰 내용',
-              maxLines: 5,
             ),
           ],
         ),
-      ),
-    );
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildLinedTextField(controller: titleController, label: '제목'),
+                _buildLinedTextField(controller: authorController, label: '작가'),
+                _buildLinedTextField(controller: genreController, label: '장르'),
+                _buildLinedTextField(
+                  controller: contentController,
+                  label: '리뷰 내용',
+                  maxLines: 5,
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   Widget _buildLinedTextField({
