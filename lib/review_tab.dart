@@ -240,11 +240,15 @@ class _ReviewTabState extends State<ReviewTab>
 class ReviewDetailPage extends StatelessWidget {
   final Map<String, String>? review;
   final void Function(Map<String, String>) onSubmit;
+  final int? reviewIndex;
+  final VoidCallback? onDelete;
 
   const ReviewDetailPage({
     super.key,
     this.review,
     required this.onSubmit,
+    this.reviewIndex,
+    this.onDelete,
   });
 
   @override
@@ -258,9 +262,48 @@ class ReviewDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(review == null ? '리뷰 추가' : '리뷰 수정',
-            style: TextStyle(fontFamily: "Pretendard")),
-        backgroundColor: Colors.teal[50],
+        title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
+        backgroundColor: Colors.white,
+        actions: [
+          if (review != null)
+            TextButton(
+              onPressed: () {
+                if (reviewIndex != null) {
+                  // deleteReview 함수 호출
+                  context.read<AppState>().deleteReview(reviewIndex!);
+                  Navigator.pop(context);
+                  if (onDelete != null)
+                    onDelete!();
+                  else
+                    print('Review index is null');
+                }
+              },
+              child: const Text(
+                '삭제',
+                style: TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            ),
+          TextButton(
+            onPressed: () {
+              final now = DateTime.now();
+              final formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now);
+
+              final newReview = {
+                'title': titleController.text,
+                'author': authorController.text,
+                'genre': genreController.text,
+                'content': contentController.text,
+                'date': formattedDate,
+              };
+              onSubmit(newReview);
+              Navigator.pop(context);
+            },
+            child: const Text(
+              '저장',
+              style: TextStyle(color: Colors.teal, fontSize: 16),
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -272,37 +315,7 @@ class ReviewDetailPage extends StatelessWidget {
             _buildLinedTextField(
               controller: contentController,
               label: '리뷰 내용',
-              maxLines: 10,
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    final now = DateTime.now();
-                    final formattedDate =
-                        DateFormat('yyyy-MM-dd HH:mm').format(now);
-
-                    final newReview = {
-                      'title': titleController.text,
-                      'author': authorController.text,
-                      'genre': genreController.text,
-                      'content': contentController.text,
-                      'date': formattedDate,
-                    };
-                    onSubmit(newReview);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal[300],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 32),
-                  ),
-                  child: const Text('저장'),
-                ),
-              ],
+              maxLines: 5,
             ),
           ],
         ),
@@ -325,13 +338,13 @@ class ReviewDetailPage extends StatelessWidget {
         TextField(
           controller: controller,
           maxLines: maxLines,
-          decoration: null, // InputDecoration 제거
+          decoration: null,
           style: const TextStyle(fontSize: 16),
-          cursorColor: Colors.black, // 커서 색상
+          cursorColor: Colors.black,
         ),
         const Divider(
-          color: Colors.black, // 가로선 색상
-          thickness: 1, // 가로선 두께
+          color: Colors.black,
+          thickness: 1,
         ),
         const SizedBox(height: 12),
       ],
