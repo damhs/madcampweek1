@@ -74,6 +74,26 @@ class _GalleryTabState extends State<GalleryTab>
           actions: isImageSelectionMode
               ? <Widget>[
                   IconButton(
+                    icon: const Icon(Icons.drive_folder_upload,
+                        color: Colors.purple),
+                    onPressed: () async {
+                      final newFolderName = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FolderMovePage()));
+                      if (newFolderName != null) {
+                        setState(() {
+                          for (int i = 0; i < currentImages.length; i++) {
+                            if (currentImages[i]['isSelected'] == 'true') {
+                              currentImages[i]['folderName'] = newFolderName;
+                            }
+                          }
+                          isImageSelectionMode = false;
+                        });
+                      }
+                    },
+                  ),
+                  IconButton(
                     icon: const Icon(
                       Icons.delete,
                       color: Colors.red,
@@ -132,13 +152,21 @@ class _GalleryTabState extends State<GalleryTab>
                       IconButton(
                         onPressed: () {
                           setState(() {
-                            for (int i = 0; i < selectedFolders.length; i++) {
-                              String folderName =
-                                  folders[folders.indexOf(selectedFolders[i])];
-                              context.read<AppState>().deleteFolder(folderName);
-                            }
-                            selectedFolders = [];
-                            isFolderSelectionMode = false;
+                            _showDeleteFolderDialog(context).then((isDelete) {
+                              if (isDelete == true) {
+                                for (int i = 0;
+                                    i < selectedFolders.length;
+                                    i++) {
+                                  String folderName = folders[
+                                      folders.indexOf(selectedFolders[i])];
+                                  context
+                                      .read<AppState>()
+                                      .deleteFolder(folderName);
+                                }
+                                selectedFolders = [];
+                                isFolderSelectionMode = false;
+                              }
+                            });
                           });
                         },
                         icon: const Icon(Icons.delete, color: Colors.red),
@@ -335,22 +363,6 @@ class _GalleryTabState extends State<GalleryTab>
           : isFolderSelectionMode
               ? folderIndex == folders.length + 1
                   ? SizedBox(width: 0)
-                  // ? Padding(
-                  //     padding: const EdgeInsets.all(8.0),
-                  //     child: Column(
-                  //       children: [
-                  //         Icon(
-                  //           Icons.check_circle,
-                  //           size: 80,
-                  //           color: Color(0xFF33CCCC),
-                  //         ),
-                  //         const Text(
-                  //           '완료',
-                  //           style: TextStyle(color: Colors.black),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   )
                   : selectedFolders.contains(folders[folderIndex - 1])
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -445,33 +457,34 @@ class _GalleryTabState extends State<GalleryTab>
     );
   }
 
-  // Future<void> _showDeleteFolderDialog(BuildContext context) {
-  //   print('showDeleteFolderDialog');
-  //   return showDialog<void>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       print('showDialog');
-  //       return AlertDialog(
-  //         title: Text('폴더 삭제'),
-  //         content: Text('정말로 이 폴더를 삭제하시겠습니까?'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: Text('취소'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: Text('삭제'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  Future<bool> _showDeleteFolderDialog(BuildContext context) async {
+    print('showDeleteFolderDialog');
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        print('showDialog');
+        return AlertDialog(
+          title: Text('폴더 삭제'),
+          content: Text('정말로 이 폴더를 삭제하시겠습니까?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('삭제'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result ?? false;
+  }
 
   Future<String?> _showCreateFolderDialog(BuildContext context) {
     TextEditingController folderNameController = TextEditingController();
@@ -804,5 +817,90 @@ class _ImageItemDetailPageState extends State<ImageItemDetailPage> {
         ),
       ),
     );
+  }
+}
+
+class FolderMovePage extends StatefulWidget {
+  const FolderMovePage({super.key});
+
+  @override
+  _FolderMovePageState createState() => _FolderMovePageState();
+}
+
+class _FolderMovePageState extends State<FolderMovePage> {
+  @override
+  Widget build(BuildContext context) {
+    final folders = Provider.of<AppState>(context).folders;
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: const Text('폴더 이동'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(
+              () {
+                Navigator.pop(context);
+              },
+            );
+          },
+        ),
+      ),
+      body: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 5.0,
+          mainAxisSpacing: 5.0,
+          childAspectRatio: 1.0,
+        ),
+        itemCount: folders.length,
+        itemBuilder: (context, folderIndex) {
+          return _buildFolder(folders: folders, folderIndex: folderIndex);
+        },
+      ),
+    );
+  }
+
+  Widget _buildFolder({
+    required List<String> folders,
+    required int folderIndex,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context, folders[folderIndex]);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Icon(
+              Icons.folder,
+              size: 80,
+              color: Color(0xFF33CCCC),
+            ),
+            Text(
+              folders[folderIndex],
+              style: const TextStyle(color: Colors.black),
+            ),
+          ],
+        ),
+      ),
+    );
+    // return Padding(
+    //   padding: const EdgeInsets.all(8.0),
+    //   child: Column(
+    //     children: [
+    //       Icon(
+    //         Icons.folder,
+    //         size: 80,
+    //         color: Color(0xFF33CCCC),
+    //       ),
+    //       Text(
+    //         folders[folderIndex],
+    //         style: const TextStyle(color: Colors.black),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 }
