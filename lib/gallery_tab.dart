@@ -112,15 +112,59 @@ class _GalleryTabState extends State<GalleryTab>
           right: BorderSide(color: Colors.teal, width: 0),
         ),
         backgroundColor: Colors.teal[50],
-        child: ListView.builder(
-          itemCount: folders.length + 2,
-          itemBuilder: (context, folderIndex) {
-            return _buildFolder(
-              folders: folders,
-              folderIndex: folderIndex,
-            );
-          },
-        ),
+        child: isFolderSelectionMode
+            ? Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: folders.length + 1,
+                      itemBuilder: (context, folderIndex) {
+                        return _buildFolder(
+                          folders: folders,
+                          folderIndex: folderIndex,
+                        );
+                      },
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            for (int i = 0; i < selectedFolders.length; i++) {
+                              String folderName =
+                                  folders[folders.indexOf(selectedFolders[i])];
+                              context.read<AppState>().deleteFolder(folderName);
+                            }
+                            selectedFolders = [];
+                            isFolderSelectionMode = false;
+                          });
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isFolderSelectionMode = false;
+                          });
+                        },
+                        icon: const Icon(Icons.check_circle_outline,
+                            color: Colors.purple),
+                      ),
+                    ],
+                  )
+                ],
+              )
+            : ListView.builder(
+                itemCount: folders.length + 2,
+                itemBuilder: (context, folderIndex) {
+                  return _buildFolder(
+                    folders: folders,
+                    folderIndex: folderIndex,
+                  );
+                },
+              ),
       ),
       body: currentImages.isEmpty
           ? const Center(child: Text('이미지가 없습니다.'))
@@ -224,7 +268,7 @@ class _GalleryTabState extends State<GalleryTab>
     return GestureDetector(
       onTap: () {
         if (folderIndex == 0) {
-          // 전체 이미지
+          // 나의 독서 앨범 이미지
           setState(() {
             currentFolder = '나의 독서 앨범';
           });
@@ -277,12 +321,12 @@ class _GalleryTabState extends State<GalleryTab>
               child: Column(
                 children: [
                   Icon(
-                    Icons.photo_library,
+                    Icons.folder,
                     size: 80,
                     color: Color(0xFF33CCCC),
                   ),
                   const Text(
-                    '나의 독서 앨범',
+                    '전체',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -290,22 +334,23 @@ class _GalleryTabState extends State<GalleryTab>
             )
           : isFolderSelectionMode
               ? folderIndex == folders.length + 1
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            size: 80,
-                            color: Color(0xFF33CCCC),
-                          ),
-                          const Text(
-                            '완료',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    )
+                  ? SizedBox(width: 0)
+                  // ? Padding(
+                  //     padding: const EdgeInsets.all(8.0),
+                  //     child: Column(
+                  //       children: [
+                  //         Icon(
+                  //           Icons.check_circle,
+                  //           size: 80,
+                  //           color: Color(0xFF33CCCC),
+                  //         ),
+                  //         const Text(
+                  //           '완료',
+                  //           style: TextStyle(color: Colors.black),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   )
                   : selectedFolders.contains(folders[folderIndex - 1])
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -363,9 +408,36 @@ class _GalleryTabState extends State<GalleryTab>
                             size: 80,
                             color: Color(0xFF33CCCC),
                           ),
-                          Text(
-                            folders[folderIndex - 1],
-                            style: const TextStyle(color: Colors.black),
+                          Row(
+                            mainAxisSize:
+                                MainAxisSize.min, // Row 크기를 내용 크기에 맞게 축소
+                            crossAxisAlignment:
+                                CrossAxisAlignment.center, // 세로 중앙 정렬
+                            children: [
+                              Text(
+                                folders[folderIndex - 1],
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 2.0), // 텍스트와 아이콘 간 최소 간격
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _showEditFolderNameDialog(
+                                            context, folders[folderIndex - 1])
+                                        .then((newFolderName) {
+                                      if (newFolderName != null) {
+                                        context.read<AppState>().editFolder(
+                                            folders[folderIndex - 1],
+                                            newFolderName);
+                                      }
+                                    });
+                                  },
+                                  child: const Icon(Icons.edit,
+                                      size: 16), // 아이콘 크기 조정
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
