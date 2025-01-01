@@ -63,17 +63,37 @@ class _ProfileTabState extends State<ProfileTab> {
                           onTap: () {
                             _showImageSourceSelector(context, appState);
                           },
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.white,
-                            backgroundImage: appState.profileImage != null
-                                ? FileImage(appState.profileImage!)
-                                : null,
-                            child: appState.profileImage == null
-                                ? Image(
-                                    image: const AssetImage(
-                                        'assets/img/dadok_logo.png'))
-                                : null,
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.white,
+                                backgroundImage: appState.profileImage != null
+                                    ? FileImage(appState.profileImage!)
+                                    : null,
+                                child: appState.profileImage == null
+                                    ? Image(
+                                        image: const AssetImage(
+                                            'assets/img/dadok_logo.png'))
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.teal,
+                                    size: 20, // 카메라 아이콘 크기
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 16),
