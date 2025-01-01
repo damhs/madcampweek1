@@ -62,30 +62,48 @@ class MyApp extends StatelessWidget {
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
+  static _MainScreenState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MainScreenState>();
+
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1; // 기본으로 두 번째 탭 선택
-
+  int _currentIndex = 0; // 기본으로 두 번째 탭 선택
+  final PageController _pageController = PageController();
   late final List<Widget> _tabContents;
 
+  void jumpToPage(int page) {
+    setState(() {
+      _currentIndex = page;
+    });
+    _pageController.jumpToPage(page);
+  }
+
   @override
-  void initState() {
-    super.initState();
-    _tabContents = [
-      const SearchTab(),
-      const GalleryTab(),
-      const ReviewTab(),
-      const ProfileTab(),
-    ];
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _tabContents[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: const [
+          ProfileTab(), // 프로필 탭
+          GalleryTab(),
+          ReviewTab(),
+          SearchTab(),
+        ],
+      ),
       bottomNavigationBar: SizedBox(
         height: 100,
         child: BottomNavigationBar(
@@ -96,13 +114,14 @@ class _MainScreenState extends State<MainScreen> {
             setState(() {
               _currentIndex = index;
             });
+            _pageController.jumpToPage(index);
           },
           selectedItemColor: const Color(0xFF33CCCC),
           unselectedItemColor: Colors.grey,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: '검색',
+              icon: Icon(Icons.home),
+              label: '홈',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.photo_library),
@@ -113,8 +132,8 @@ class _MainScreenState extends State<MainScreen> {
               label: '리뷰',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: '프로필',
+              icon: Icon(Icons.search),
+              label: '검색',
             ),
           ],
         ),

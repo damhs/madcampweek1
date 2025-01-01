@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'main.dart';
 
 class ReviewTab extends StatefulWidget {
   const ReviewTab({super.key});
@@ -33,7 +34,9 @@ class _ReviewTabState extends State<ReviewTab>
         title: Row(
           children: [
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                MainScreen.of(context)?.jumpToPage(0);
+              },
               icon: Image.asset(
                 'assets/img/dokki_logo.png',
                 width: 30,
@@ -270,7 +273,7 @@ class ReviewDetailPage extends StatelessWidget {
 
       // 스크린샷 파일 공유
       final List<XFile> files = [XFile(fullPath)];
-      await Share.shareXFiles(files, text: 'Check out my screenshot!');
+      await Share.shareXFiles(files, text: 'Check out my review!');
     } catch (e) {
       print('Failed to capture and save screenshot: $e');
     }
@@ -289,7 +292,7 @@ class ReviewDetailPage extends StatelessWidget {
       controller: screenshotController,
       child: Scaffold(
           appBar: AppBar(
-            title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
+            title: Text(review == null ? '리뷰' : '리뷰'),
             backgroundColor: Colors.white,
             actions: [
               IconButton(

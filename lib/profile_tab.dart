@@ -4,6 +4,7 @@ import 'app_state.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:table_calendar/table_calendar.dart';
+import 'main.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -21,10 +22,23 @@ class _ProfileTabState extends State<ProfileTab> {
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        title: const Text(
-          '프로필',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: Row(children: [
+          IconButton(
+            onPressed: () {
+              MainScreen.of(context)?.jumpToPage(0);
+            },
+            icon: Image.asset(
+              'assets/img/dokki_logo.png',
+              width: 30,
+              height: 30,
+            ),
+          ),
+          SizedBox(width: 10),
+          Text(
+            '${appState.nickname}님, 어서오세요!',
+            style: TextStyle(color: Colors.black),
+          ),
+        ]),
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.teal[50],
@@ -96,9 +110,11 @@ class _ProfileTabState extends State<ProfileTab> {
                                     child: Text(
                                       appState.statusMessage,
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: Colors.grey,
                                       ),
+                                      maxLines: 2,
+                                      softWrap: true,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -193,6 +209,7 @@ class _ProfileTabState extends State<ProfileTab> {
         return AlertDialog(
           title: const Text('상태 메시지 수정'),
           content: TextField(
+            maxLength: 20,
             controller: statusController,
             decoration: const InputDecoration(
               labelText: '새 상태 메시지',
@@ -333,6 +350,7 @@ class _ProfileTabState extends State<ProfileTab> {
         return AlertDialog(
           title: const Text('닉네임 수정'),
           content: TextField(
+            maxLength: 10,
             controller: nicknameController,
             decoration: const InputDecoration(
               labelText: '새 닉네임',

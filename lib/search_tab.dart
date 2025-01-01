@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'review_tab.dart';
 import 'gallery_tab.dart';
+import 'profile_tab.dart';
 
 class SearchTab extends StatefulWidget {
-  const SearchTab({Key? key}) : super(key: key);
+  const SearchTab({super.key});
 
   @override
   State<SearchTab> createState() => _SearchTabState();
@@ -115,15 +116,15 @@ class _SearchTabState extends State<SearchTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('취소'),
               style: TextButton.styleFrom(foregroundColor: Colors.black),
+              child: const Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 context.read<AppState>().pickImageFromCamera(context, '');
               },
-              child: const Text('사진'),
               style: TextButton.styleFrom(foregroundColor: Colors.black),
+              child: const Text('사진'),
             ),
             TextButton(
               onPressed: () {
@@ -144,8 +145,8 @@ class _SearchTabState extends State<SearchTab> {
                   ),
                 );
               },
-              child: const Text('텍스트'),
               style: TextButton.styleFrom(foregroundColor: Colors.black),
+              child: const Text('텍스트'),
             ),
           ],
         );
@@ -165,7 +166,9 @@ class _SearchTabState extends State<SearchTab> {
         title: Row(
           children: [
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                MainScreen.of(context)?.jumpToPage(0);
+              },
               icon: Image.asset(
                 'assets/img/dokki_logo.png',
                 width: 30,
