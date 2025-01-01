@@ -48,10 +48,10 @@ dependencies:
   screenshot: ^3.0.0
   share_plus: ^10.1.3
   path_provider: ^2.1.5
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"
-  flutter_native_splash: ^2.2.19
   flutter_test:
     sdk: flutter
 
@@ -67,13 +67,13 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: "AppIcon"
-  image_path_ios: "assets/img/iTunesArtwork@1x.png"
-  image_path_android: "assets/img/playstore-icon.png"
+  image_path_ios: "assets/img/appstore.png"
+  image_path_android: "assets/img/playstore.png"
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#ffffff"
-  image: "assets/img/dokki_logo.png"
+  color: "#000000"
+  image: "assets/img/dadok_logo.png"
   android: true
   ios: true
 

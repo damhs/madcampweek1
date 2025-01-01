@@ -65,13 +65,14 @@ class _ProfileTabState extends State<ProfileTab> {
                           },
                           child: CircleAvatar(
                             radius: 50,
-                            backgroundColor: Colors.teal[100],
+                            backgroundColor: Colors.white,
                             backgroundImage: appState.profileImage != null
                                 ? FileImage(appState.profileImage!)
                                 : null,
                             child: appState.profileImage == null
-                                ? const Icon(Icons.person,
-                                    size: 50, color: Colors.grey)
+                                ? Image(
+                                    image: const AssetImage(
+                                        'assets/img/dadok_logo.png'))
                                 : null,
                           ),
                         ),
