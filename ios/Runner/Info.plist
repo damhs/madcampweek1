@@ -6,6 +6,8 @@
 	<string>$(PRODUCT_NAME) 사진첩 접근 권한</string>
 	<key>NSCameraUsageDescription</key>
 	<string>$(PRODUCT_NAME) 카메라 접근 권한</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>$(PRODUCT_NAME) 사진첩에 사진 저장 권한</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
