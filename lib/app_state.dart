@@ -465,6 +465,21 @@ class AppState extends ChangeNotifier {
     'review_day_30': '지독한 리뷰어',
   };
 
+  final Map<String, String> badgeDescriptions = {
+    'first_review': '첫 리뷰를 작성했습니다.',
+    'text_review_5': '텍스트 리뷰를 5개 작성했습니다.',
+    'photo_review_5': '사진 리뷰를 5개 작성했습니다.',
+    'text_review_10': '텍스트 리뷰를 10개 작성했습니다.',
+    'photo_review_10': '사진 리뷰를 10개 작성했습니다.',
+    'text_review_50': '텍스트 리뷰를 50개 작성했습니다.',
+    'photo_review_50': '사진 리뷰를 50개 작성했습니다.',
+    'text_review_100': '텍스트 리뷰를 100개 작성했습니다.',
+    'photo_review_100': '사진 리뷰를 100개 작성했습니다.',
+    'total_review_100': '리뷰를 총 100개 작성했습니다.',
+    'review_day_7': '7일 동안 리뷰를 작성했습니다.',
+    'review_day_30': '30일 동안 리뷰를 작성했습니다.',
+  };
+
   Map<String, bool> get badges => Map.unmodifiable(_badges);
 
   void _unlockBadge(String badgeId) async {

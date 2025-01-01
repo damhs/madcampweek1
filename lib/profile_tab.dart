@@ -410,7 +410,7 @@ class _ProfileTabState extends State<ProfileTab> {
     final badges = appState.badges.entries.map((entry) {
       final badgeId = entry.key;
       final isUnlocked = entry.value;
-
+      final badgeDescription = appState.badgeDescriptions[badgeId] ?? '알 수 없음';
       return _buildBadgeTile(
         title: isUnlocked
             ? appState.badgeNames[badgeId] ?? '알 수 없는 뱃지' // 잠금 해제 시 실제 이름
@@ -419,6 +419,7 @@ class _ProfileTabState extends State<ProfileTab> {
             ? 'assets/badges/$badgeId.png' // 보유한 뱃지 이미지
             : 'assets/badges/locked.png', // 잠긴 뱃지 이미지
         isUnlocked: isUnlocked,
+        description: badgeDescription,
       );
     }).toList();
 
@@ -450,34 +451,92 @@ class _ProfileTabState extends State<ProfileTab> {
     required String title,
     required String iconPath,
     required bool isUnlocked,
+    required String description,
   }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double iconSize = constraints.maxWidth * 0.6; // 셀 너비의 60% 사용
-        double textSize = constraints.maxWidth * 0.15; // 텍스트 크기 동적 조정
+    return GestureDetector(
+      onTap: () {
+        if (isUnlocked) {
+          _showBadgeDialog(title, iconPath, description);
+        }
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double iconSize = constraints.maxWidth * 0.6; // 셀 너비의 60% 사용
+          double textSize = constraints.maxWidth * 0.15; // 텍스트 크기 동적 조정
 
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              iconPath,
-              width: iconSize,
-              height: iconSize,
-              /*color: isUnlocked ? null : Colors.grey,
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                iconPath,
+                width: iconSize,
+                height: iconSize,
+                /*color: isUnlocked ? null : Colors.grey,
               colorBlendMode:
                   isUnlocked ? null : BlendMode.saturation, // 잠긴 상태 블렌딩*/
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: textSize,
-                color: isUnlocked ? Colors.black : Colors.grey,
               ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: textSize,
+                  color: isUnlocked ? Colors.black : Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showBadgeDialog(String title, String iconPath, String description) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                iconPath,
+                width: 100,
+                height: 100,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         );
       },
     );
