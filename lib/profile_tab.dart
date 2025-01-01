@@ -131,27 +131,37 @@ class _ProfileTabState extends State<ProfileTab> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _buildStatisticTile(
-                          icon: Icons.photo_library,
-                          label: '업로드한 사진',
-                          value: appState.imageCount.toString(),
+                        Expanded(
+                          // 동일한 가로 크기를 적용
+                          child: _buildStatisticTile(
+                            icon: Icons.photo_library,
+                            label: '업로드한 사진',
+                            value: appState.imageCount.toString(),
+                          ),
                         ),
-                        _buildStatisticTile(
-                          icon: Icons.edit,
-                          label: '작성한 리뷰',
-                          value: appState.reviewCount.toString(),
+                        Expanded(
+                          // 동일한 가로 크기를 적용
+                          child: _buildStatisticTile(
+                            icon: Icons.edit,
+                            label: '작성한 리뷰',
+                            value: appState.reviewCount.toString(),
+                          ),
                         ),
-                        _buildStatisticTile(
-                          icon: Icons.calendar_today,
-                          label: '활동한 날',
-                          value: appState.uploadDayCount.toString(),
+                        Expanded(
+                          // 동일한 가로 크기를 적용
+                          child: _buildStatisticTile(
+                            icon: Icons.calendar_today,
+                            label: '활동한 날',
+                            value: appState.uploadDayCount.toString(),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
 
                 // 뱃지 섹션
@@ -358,17 +368,21 @@ class _ProfileTabState extends State<ProfileTab> {
     required String value,
   }) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(icon, size: 32, color: Colors.teal),
         const SizedBox(height: 4),
         Text(
           label,
           style: const TextStyle(fontSize: 14, color: Colors.grey),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
           value,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
       ],
     );
