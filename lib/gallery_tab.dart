@@ -347,7 +347,7 @@ class _GalleryTabState extends State<GalleryTab>
           }
         }
       },
-      onDoubleTap: () {
+      onLongPress: () {
         // 배포 전에 onLongPress로 바꾸기
         if (folderIndex != 0 && folderIndex != folders.length + 1) {
           setState(() {

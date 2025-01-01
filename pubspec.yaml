@@ -44,6 +44,7 @@ dependencies:
   intl: ^0.19.0
   table_calendar: ^3.1.0
   image_gallery_saver: ^2.0.3
+
   cached_network_image: ^3.4.1
   screenshot: ^3.0.0
   share_plus: ^10.1.3
@@ -72,7 +73,7 @@ flutter_launcher_icons:
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#000000"
+  color: "#FFFFFF"
   image: "assets/img/dadok_logo.png"
   android: true
   ios: true
