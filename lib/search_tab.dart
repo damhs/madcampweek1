@@ -164,10 +164,13 @@ class _SearchTabState extends State<SearchTab> {
         toolbarHeight: 80,
         title: Row(
           children: [
-            Image.asset(
-              'assets/img/dokki_logo.png',
-              width: 30,
-              height: 30,
+            IconButton(
+              onPressed: () {},
+              icon: Image.asset(
+                'assets/img/dokki_logo.png',
+                width: 30,
+                height: 30,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(

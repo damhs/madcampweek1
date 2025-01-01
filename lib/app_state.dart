@@ -6,14 +6,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
-import 'gallery_tab.dart'; // Add this line to import the ImageItemDetailPage
+import 'gallery_tab.dart';
 import 'dart:io';
 
 class AppState extends ChangeNotifier {
   List<Map<String, String>> _reviews = [];
   List<Map<String, String>> _imageItems = [];
   List<String> _folders = [];
-
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _descriptionController = TextEditingController();
 

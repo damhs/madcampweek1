@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ReviewTab extends StatefulWidget {
   const ReviewTab({super.key});
@@ -29,10 +32,13 @@ class _ReviewTabState extends State<ReviewTab>
         backgroundColor: Colors.white,
         title: Row(
           children: [
-            Image.asset(
-              'assets/img/dokki_logo.png',
-              width: 30,
-              height: 30,
+            IconButton(
+              onPressed: () {},
+              icon: Image.asset(
+                'assets/img/dokki_logo.png',
+                width: 30,
+                height: 30,
+              ),
             ),
             const SizedBox(width: 10),
             Text(
@@ -43,20 +49,18 @@ class _ReviewTabState extends State<ReviewTab>
         ),
         actions: isSelectionMode
             ? [
-                TextButton(
-                  onPressed: _toggleSelectionMode,
-                  child:
-                      const Text('취소', style: TextStyle(color: Colors.black)),
-                ),
-                TextButton(
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
                     context
                         .read<AppState>()
                         .deleteSelectedReviews(selectedIndexes);
                     _toggleSelectionMode();
                   },
-                  child:
-                      const Text('삭제', style: TextStyle(color: Colors.black)),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.check, color: Colors.purple),
+                  onPressed: _toggleSelectionMode,
                 ),
               ]
             : [
@@ -244,14 +248,33 @@ class ReviewDetailPage extends StatelessWidget {
   final void Function(Map<String, String>) onSubmit;
   final int? reviewIndex;
   //final void Function()? onDelete;
+  final screenshotController = ScreenshotController();
 
-  const ReviewDetailPage({
+  ReviewDetailPage({
     super.key,
     this.review,
     required this.onSubmit,
     this.reviewIndex,
     //this.onDelete,
   });
+
+  void captureAndShare() async {
+    try {
+      final directory = (await getApplicationDocumentsDirectory()).path;
+      String fileName = '${DateTime.now().microsecondsSinceEpoch}.png';
+      String fullPath = '$directory/$fileName'; // 전체 파일 경로 생성
+
+      await screenshotController.captureAndSave(directory, fileName: fileName);
+
+      print('Screenshot saved to $fullPath');
+
+      // 스크린샷 파일 공유
+      final List<XFile> files = [XFile(fullPath)];
+      await Share.shareXFiles(files, text: 'Check out my screenshot!');
+    } catch (e) {
+      print('Failed to capture and save screenshot: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -262,67 +285,70 @@ class ReviewDetailPage extends StatelessWidget {
     final contentController =
         TextEditingController(text: review?['content'] ?? '');
 
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
-          backgroundColor: Colors.white,
-          actions: [
-            if (review != null)
-              TextButton(
+    return Screenshot(
+      controller: screenshotController,
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text(review == null ? '리뷰 추가' : '리뷰 수정'),
+            backgroundColor: Colors.white,
+            actions: [
+              IconButton(
+                  icon: const Icon(Icons.share, color: Colors.purple),
+                  onPressed: () {
+                    captureAndShare();
+                  }),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
                   try {
                     context.read<AppState>().deleteReview(reviewIndex!);
-                    //if (onDelete != null) onDelete!();
                     Navigator.pop(context);
                   } catch (e) {
                     print('Error deleting review: $e');
                   }
                 },
-                child: const Text(
-                  '삭제',
-                  style: TextStyle(color: Colors.red, fontSize: 16),
-                ),
               ),
-            TextButton(
-              onPressed: () {
-                final now = DateTime.now();
-                final formattedDate =
-                    DateFormat('yyyy-MM-dd HH:mm').format(now);
+              IconButton(
+                icon: const Icon(Icons.check, color: Colors.purple),
+                onPressed: () {
+                  final now = DateTime.now();
+                  final formattedDate =
+                      DateFormat('yyyy-MM-dd HH:mm').format(now);
 
-                final newReview = {
-                  'title': titleController.text,
-                  'author': authorController.text,
-                  'genre': genreController.text,
-                  'content': contentController.text,
-                  'date': formattedDate,
-                };
-                onSubmit(newReview);
-                Navigator.pop(context);
-              },
-              child: const Text(
-                '저장',
-                style: TextStyle(color: Colors.teal, fontSize: 16),
+                  final newReview = {
+                    'title': titleController.text,
+                    'author': authorController.text,
+                    'genre': genreController.text,
+                    'content': contentController.text,
+                    'date': formattedDate,
+                  };
+                  onSubmit(newReview);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildLinedTextField(
+                      controller: titleController, label: '제목'),
+                  _buildLinedTextField(
+                      controller: authorController, label: '작가'),
+                  _buildLinedTextField(
+                      controller: genreController, label: '장르'),
+                  _buildLinedTextField(
+                    controller: contentController,
+                    label: '리뷰 내용',
+                    maxLines: 5,
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildLinedTextField(controller: titleController, label: '제목'),
-                _buildLinedTextField(controller: authorController, label: '작가'),
-                _buildLinedTextField(controller: genreController, label: '장르'),
-                _buildLinedTextField(
-                  controller: contentController,
-                  label: '리뷰 내용',
-                  maxLines: 5,
-                ),
-              ],
-            ),
-          ),
-        ));
+          )),
+    );
   }
 
   Widget _buildLinedTextField({
