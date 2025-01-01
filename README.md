@@ -36,7 +36,7 @@
 
 ## 💡 주요 기능
 
-## Tab1: Home Tab
+## Tab1: Home Tab <img src="https://github.com/user-attachments/assets/21861b4b-16e5-4ffb-bec6-70b4fd762708" alt="홈" width="200" align="right">
 
 - **👤사용자 개인정보**
 
@@ -74,7 +74,7 @@
 
   - 뱃지 선택 시 뱃지 확대 및 설명(달성 조건) 표시
 
-## Tab2: Gallery Tab
+## Tab2: Gallery Tab <img src="https://github.com/user-attachments/assets/c8cd4957-bf84-4e97-983c-39c3102b9681" alt="갤러리" width="200" align="right">
 
 - **📷사진 추가/수정/삭제**
 
@@ -93,8 +93,9 @@
   - 새 폴더 추가로 폴더 간 사진 이동
 
   - 폴더 여러개 선택 삭제
-
-## Tab3: Review Tab
+<br>
+   
+## Tab3: Review Tab <img src="https://github.com/user-attachments/assets/0f656c62-4c4a-4a7d-8065-77e1d742207c" alt="갤러리" width="200" align="right">
 
 - **📝리뷰 추가/수정/삭제**
 
@@ -116,7 +117,7 @@
 
   - 문자, 드라이브 등 다양하게 공유 가능
 
-## Tab4: Search Tab
+## Tab4: Search Tab <img src="https://github.com/user-attachments/assets/a72ec5a7-2eef-4020-8479-cfe9f35010c7" alt="검색" width="200" align="right">
 
 - **🔎도서 검색 기능**
 
